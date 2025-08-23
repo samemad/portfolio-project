@@ -1,0 +1,73 @@
+/* ---------------------- */
+/* Scroll and section fix  */
+/* ---------------------- */
+.certs-section {
+  padding-top: 100px;  /* ensures title shows below navbar */
+}
+
+.certs-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 35px;
+  padding: 20px 40px 40px 40px;
+  scroll-behavior: smooth;
+}
+
+.cert-card {
+  display: inline-block;        /* ensures transform works */
+  min-width: 80%;
+  max-width: 350px;
+  background: #f4f4f4;
+  color: #333;
+  border-radius: 18px;
+  overflow: hidden;
+  text-align: center;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.4);
+  flex-shrink: 0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cert-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 14px 45px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+
+
+@media (min-width: 1024px) {
+  .cert-card {
+    min-width: 350px;   /* larger fixed size on desktop */
+  }
+}
+
+
+.cert-image {
+  width: 100%;
+  height: 180px;
+  object-fit: contain;
+  background: #fff;
+  padding: 20px;
+}
+
+.cert-content {
+  padding: 15px;
+}
+
+.cert-content h4 {
+  font-size: 1.3rem;
+  margin-bottom: 8px;
+}
+
+.cert-content p {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* Section title */
+.section-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #333;  /* adjust to section theme */
+}

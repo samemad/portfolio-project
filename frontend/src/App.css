@@ -1,0 +1,186 @@
+/* === THEME VARIABLES (keep :root & .theme-dark as you had) === */
+
+/* light defaults (keep as root) */
+:root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --accent: #FF6600;
+  --accent-contrast: #121212;
+  --card-bg: #ffffff;
+  --input-bg: #ffffff;
+  --hero-gradient: linear-gradient(90deg, #7c3aed, #6366f1);
+}
+.logo {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.08); /* subtle panel behind text */
+}
+.theme-light .logo { background: rgba(255,255,255,0.06); } /* light theme variant */
+
+/* dark theme (keep unchanged) */
+.theme-dark {
+  --bg: #0b0b0b;
+  --surface: #121212;
+  --text: #ffffff;
+  --muted: #9ca3af;
+  --accent: #FF6600;
+  --accent-contrast: #121212;
+  --card-bg: #1e1e1e;
+  --input-bg: #141414;
+  --hero-gradient: linear-gradient(90deg, #2b2b36, #1f1f2a);
+}
+
+/* light explicit: use multi-stop orange gradient (recommended) */
+.theme-light {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --accent: #FF6600;
+  --accent-contrast: #ffffff;
+  --card-bg: #ffffff;
+  --input-bg: #fff;
+  /* Rich multi-stop orange gradient (Option B recommended) */
+  --hero-gradient: linear-gradient(90deg,
+    #ff6a00 0%,
+    #ff8a1c 20%,
+    #ff9e33 45%,
+    #ffb84d 70%,
+    #ffd88a 100%);
+}
+
+/* ==== global use ==== */
+body, .app-root {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* NAVBAR adjustments (so links contrast in light/orange hero) */
+.nav-top { background: transparent; color: var(--surface); }
+.nav-scrolled { background: var(--surface); color: var(--text); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+.nav-links .nav-link { color: var(--muted); text-decoration: none; padding: 6px 8px; border-radius: 8px; }
+.nav-links .nav-link:hover { color: var(--accent); }
+.logo { color: var(--text); }
+/* HERO uses the variable and keeps readable text with an overlay */
+#hero {
+  position: relative;
+  background: var(--hero-gradient);
+  color: var(--text);
+  overflow: hidden;
+}
+
+/* subtle overlay for readability on bright gradients */
+#hero::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* slightly darker overlay to help white text read on the gradient */
+  background: linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.06) 30%, rgba(0,0,0,0.12) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* ensure hero inner content sits above overlay */
+#hero > * { position: relative; z-index: 2; }
+
+/* ensure title color stays white in dark & light variations if needed */
+.theme-dark #hero { color: #fff; }
+.theme-light #hero { color: #ffffff; }
+
+/* CV button consistency (uses accent for light theme) */
+#hero a[href$="/cv.pdf"] {
+  border-radius: 8px;
+  font-weight: 700;
+  border: 2px solid rgba(0,0,0,0.06);
+}
+/* Section title base (applies in both themes unless overridden) */
+.section-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: var(--text);                 /* default color (light theme uses this) */
+  transition: color .18s ease, text-shadow .18s ease;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/* Dark-mode override: make section titles orange (accent variable) */
+.theme-dark .section-title {
+  color: var(--accent);               /* uses your --accent (FF6600) */
+  /* boost legibility a bit on some gradients/hero: */
+  text-shadow: 0 1px 0 rgba(0,0,0,0.35);
+}
+
+/* Optional: in light theme keep titles dark/neutral (if you'd rather) */
+.theme-light .section-title {
+  color: var(--text);
+}
+
+/* Slight hover/underline effect for titles (optional) */
+.section-title::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  margin: 10px auto 0;
+  background: transparent;
+  border-radius: 4px;
+  transition: background .18s ease, transform .18s ease;
+}
+.theme-dark .section-title::after { background: rgba(255,102,0,0.95); }
+.theme-light .section-title::after { background: rgba(255,102,0,0.95); }
+
+
+/* In light theme prefer orange CV button contrast */
+.theme-light #hero a[href$="/cv.pdf"] {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: transparent;
+}
+
+/* Contact card uses variables (keeps Tailwind markup safe) */
+#contact > div > div {
+  background: var(--card-bg) !important;
+  color: var(--text) !important;
+}
+
+/* inputs use theme variables and have clear focus outlines for accessibility */
+#contact .input, #contact input, #contact textarea {
+  background: var(--input-bg) !important;
+  color: var(--text) !important;
+  border: 1px solid rgba(0,0,0,0.06);
+  transition: box-shadow .12s ease, border-color .12s ease;
+}
+#contact input:focus, #contact textarea:focus {
+  outline: none;
+  border-color: rgba(255,102,0,0.9);
+  box-shadow: 0 6px 18px rgba(255,102,0,0.08);
+}
+
+/* Buttons using .btn helper */
+.btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 2px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-weight: 700;
+}
+.btn:hover {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  transform: translateY(-2px);
+}
+
+/* ensure anchors scroll below navbar */
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+/* Cards use variables for consistent look */
+.project-card, .cert-card, .list-card {
+  background: var(--card-bg) !important;
+  color: var(--text) !important;
+  border: 1px solid rgba(0,0,0,0.06);
+}
