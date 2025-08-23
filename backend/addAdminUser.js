@@ -10,7 +10,7 @@ const db = mysql.createConnection({
 });
 
 const username = 'admin';
-const password = 'yourpassword'; // CHANGE THIS
+const password = '775194119saM'; // CHANGE THIS
 const hash = bcrypt.hashSync(password, 10);
 
 db.query('INSERT INTO users (username, passwordHash) VALUES (?, ?)', [username, hash], (err) => {
