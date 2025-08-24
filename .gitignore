@@ -9,3 +9,6 @@ admin/build
 
 # Env files
 *.env
+backend/.env
+frontend/.env
+admin/.env

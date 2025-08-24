@@ -7,12 +7,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-// Only load local .env when NOT in Railway
-if (!process.env.RAILWAY_ENV) {
-  require('dotenv').config();
-}
-
-
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 app.use(cors());
