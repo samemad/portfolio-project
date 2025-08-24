@@ -8,9 +8,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 // Only load local .env when NOT in Railway
-if (process.env.RAILWAY_ENV !== "production") {
+if (!process.env.RAILWAY_ENV) {
   require('dotenv').config();
 }
+
 
 
 const app = express();
