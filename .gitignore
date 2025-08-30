@@ -12,3 +12,4 @@ admin/build
 backend/.env
 frontend/.env
 admin/.env
+node_modules
