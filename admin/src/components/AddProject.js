@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { ClipLoader } from 'react-spinners'; // Import the spinner
+import { addProject } from "../api.js"; // Adjust path if needed
 
-export default function AddProject({ token, refresh }) {
+export default function AddProject({ refresh }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [link, setLink] = useState("");
@@ -19,13 +19,9 @@ export default function AddProject({ token, refresh }) {
 
     setLoading(true); // Start loading
     try {
-      console.log("Attempting to add project with token:", token);
-      const response = await axios.post("http://localhost:5000/api/projects", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      });
-      console.log("Project added successfully:", response.data);
+      console.log("Attempting to add project");
+      const data = await addProject(formData);
+      console.log("Project added successfully:", data);
       setTitle(""); setDescription(""); setLink(""); setImage(null);
       refresh();
     } catch (error) {

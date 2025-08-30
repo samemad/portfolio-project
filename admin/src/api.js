@@ -1,68 +1,75 @@
-﻿const API_BASE = 'https://portfolio-project-p04q.onrender.com/api';
+﻿import axios from "axios";
 
-export const getProjects = async () => {
-  const res = await fetch(`${API_BASE}/projects`);
-  return res.json();
-};
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
-export const addProject = async (data, token) => {
-  const formData = new FormData();
-  formData.append('title', data.title);
-  formData.append('description', data.description);
-  formData.append('link', data.link);
-  if (data.image) formData.append('image', data.image);
+const api = axios.create({
+  baseURL: API_BASE,
+});
 
-  const res = await fetch(`${API_BASE}/projects`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData,
-  });
-  return res.json();
-};
+// Interceptor to add token from localStorage automatically
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token && !config.headers.Authorization) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-export const deleteProject = async (id, token) => {
-  const res = await fetch(`${API_BASE}/projects/${id}`, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.json();
-};
-
-export const getCertifications = async () => {
-  const res = await fetch(`${API_BASE}/certifications`);
-  return res.json();
-};
-
-export const addCertification = async (data, token) => {
-  const formData = new FormData();
-  formData.append('name', data.name);
-  formData.append('provider', data.provider);
-  formData.append('year', data.year);
-  if (data.image) formData.append('image', data.image);
-
-  const res = await fetch(`${API_BASE}/certifications`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData,
-  });
-  return res.json();
-};
-
-export const deleteCertification = async (id, token) => {
-  const res = await fetch(`${API_BASE}/certifications/${id}`, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.json();
+// Helper for image URLs (removes '/api' to get server base, as images are likely served from root)
+export const getImageUrl = (path) => {
+  const base = API_BASE.replace("/api", "");
+  return `${base}${path}`;
 };
 
 export const login = async (username, password) => {
-  const res = await fetch(`${API_BASE}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password }),
-  });
-  return res.json();
+  const res = await api.post("/login", { username, password });
+  return res.data;
 };
 
+export const getProjects = async () => {
+  const res = await api.get("/projects");
+  return res.data;
+};
 
+export const addProject = async (formData) => {
+  const res = await api.post("/projects", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
+
+export const deleteProject = async (id) => {
+  const res = await api.delete(`/projects/${id}`);
+  return res.data;
+};
+
+export const getCertifications = async () => {
+  const res = await api.get("/certifications");
+  return res.data;
+};
+
+export const addCertification = async (formData) => {
+  const res = await api.post("/certifications", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
+
+export const deleteCertification = async (id) => {
+  const res = await api.delete(`/certifications/${id}`);
+  return res.data;
+};
+
+export const updateProject = async (id, formData) => {
+  const res = await api.put(`/projects/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
+
+export const updateCertification = async (id, formData) => {
+  const res = await api.put(`/certifications/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { login } from "../api.js"; // Adjust path if needed (from components to root src)
 
 export default function Login({ setToken }) {
   const [username, setUsername] = useState("");
@@ -10,10 +10,10 @@ export default function Login({ setToken }) {
     e.preventDefault();
     try {
       console.log("Attempting login with:", { username, password });
-      const res = await axios.post("http://localhost:5000/api/login", { username, password });
-      console.log("Login response:", res.data);
-      if (res.data.token) {
-        setToken(res.data.token);
+      const data = await login(username, password);
+      console.log("Login response:", data);
+      if (data.token) {
+        setToken(data.token);
       } else {
         throw new Error("No token received");
       }

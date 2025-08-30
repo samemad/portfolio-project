@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { ClipLoader } from 'react-spinners'; // Import the spinner
+import { addCertification } from "../api.js"; // Adjust path if needed
 
-export default function AddCert({ token, refresh }) {
+export default function AddCert({ refresh }) {
   const [name, setName] = useState("");
   const [provider, setProvider] = useState("");
   const [year, setYear] = useState("");
@@ -19,13 +19,9 @@ export default function AddCert({ token, refresh }) {
 
     setLoading(true); // Start loading
     try {
-      console.log("Attempting to add certification with token:", token);
-      const response = await axios.post("http://localhost:5000/api/certifications", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      });
-      console.log("Certification added successfully:", response.data);
+      console.log("Attempting to add certification");
+      const data = await addCertification(formData);
+      console.log("Certification added successfully:", data);
       setName(""); setProvider(""); setYear(""); setImage(null);
       refresh();
     } catch (error) {
