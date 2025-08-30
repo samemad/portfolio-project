@@ -9,10 +9,13 @@ const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
+const cors = require("cors");
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://devsam.icu'], // Restrict to admin frontend origin
+  origin: ["https://devsam.icu", "https://portfolio-project-p04q.onrender.com"],
   credentials: true
 }));
+
 app.use(express.json());
 
 console.log('ًں”§ Server starting...');
