@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { ClipLoader } from 'react-spinners'; // Import the spinner
 
 export default function AddProject({ token, refresh }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [link, setLink] = useState("");
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false); // State for loading
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,11 +17,33 @@ export default function AddProject({ token, refresh }) {
     formData.append("link", link);
     if (image) formData.append("image", image);
 
-    await axios.post("http://localhost:5000/api/projects", formData, {
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" }
-    });
-    setTitle(""); setDescription(""); setLink(""); setImage(null);
-    refresh();
+    setLoading(true); // Start loading
+    try {
+      console.log("Attempting to add project with token:", token);
+      const response = await axios.post("http://localhost:5000/api/projects", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
+      console.log("Project added successfully:", response.data);
+      setTitle(""); setDescription(""); setLink(""); setImage(null);
+      refresh();
+    } catch (error) {
+      console.error("Error adding project:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      if (error.response?.status === 403 && error.response?.data?.message === 'Invalid token') {
+        alert("Session expired. Please log in again.");
+        localStorage.removeItem("token");
+        window.location.href = "/admin";
+      } else {
+        alert(`Failed to add project: ${error.response?.data?.message || error.message}`);
+      }
+    } finally {
+      setLoading(false); // Stop loading whether success or failure
+    }
   };
 
   return (
@@ -31,6 +55,7 @@ export default function AddProject({ token, refresh }) {
         <input placeholder="Link" value={link} onChange={e => setLink(e.target.value)} />
         <input type="file" onChange={e => setImage(e.target.files[0])} />
         <button type="submit" className="action-btn">Add Project</button>
+        {loading && <ClipLoader color="#1E90FF" size={50} />} {/* Spinner */}
       </form>
     </div>
   );

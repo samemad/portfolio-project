@@ -9,10 +9,17 @@ export default function Login({ setToken }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
+      console.log("Attempting login with:", { username, password });
       const res = await axios.post("http://localhost:5000/api/login", { username, password });
-      setToken(res.data.token);
+      console.log("Login response:", res.data);
+      if (res.data.token) {
+        setToken(res.data.token);
+      } else {
+        throw new Error("No token received");
+      }
     } catch (err) {
-      setError("Login failed");
+      console.error("Login error:", err.response?.data || err.message);
+      setError("Login failed: " + (err.response?.data?.message || err.message));
     }
   };
 

@@ -6,6 +6,7 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
 
   const saveToken = (t) => {
+    console.log("Saving token to localStorage:", t);
     localStorage.setItem("token", t);
     setToken(t);
   };
