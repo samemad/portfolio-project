@@ -9,7 +9,7 @@ const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
-const cors = require("cors");
+
 
 app.use(cors({
   origin: ["https://devsam.icu", "https://portfolio-project-p04q.onrender.com"],
