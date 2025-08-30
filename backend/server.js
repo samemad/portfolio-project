@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const { Client } = require('pg');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
@@ -10,12 +10,12 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 app.use(cors({
-  origin: 'http://localhost:3000', // Restrict to admin frontend origin
+  origin: ['http://localhost:3000', 'https://devsam.icu'], // Restrict to admin frontend origin
   credentials: true
 }));
 app.use(express.json());
 
-console.log('🔧 Server starting...');
+console.log('ًں”§ Server starting...');
 console.log('Environment variables loaded:');
 console.log('DATABASE_URL:', process.env.DATABASE_URL);
 console.log('PORT:', process.env.PORT);
@@ -27,16 +27,16 @@ if (!fs.existsSync(uploadsPath)) fs.mkdirSync(uploadsPath);
 app.use('/uploads', express.static(uploadsPath)); // Completed the static serving configuration
 
 // ---------------- POSTGRESQL -----------------
-console.log('🔄 Connecting to PostgreSQL...');
+console.log('ًں”„ Connecting to PostgreSQL...');
 const db = new Client({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
 db.connect()
-  .then(() => console.log('✅ PostgreSQL Connected successfully'))
+  .then(() => console.log('âœ… PostgreSQL Connected successfully'))
   .catch(err => {
-    console.error('❌ PostgreSQL connection error:', err);
+    console.error('â‌Œ PostgreSQL connection error:', err);
     console.error('Make sure PostgreSQL is running and database exists!');
     process.exit(1);
   });
@@ -234,43 +234,43 @@ app.delete('/api/certifications/:id', verifyToken, async (req, res) => {
 const frontendBuildPath = path.join(__dirname, '../frontend/build');
 const adminBuildPath = path.join(__dirname, '../admin/build');
 
-console.log('📁 Build paths:');
+console.log('ًں“پ Build paths:');
 console.log('Frontend build path:', frontendBuildPath);
 console.log('Admin build path:', adminBuildPath);
 console.log('Frontend build exists:', fs.existsSync(frontendBuildPath));
 console.log('Admin build exists:', fs.existsSync(adminBuildPath));
 
 if (fs.existsSync(frontendBuildPath)) {
-  console.log('✅ Serving frontend static files');
+  console.log('âœ… Serving frontend static files');
   app.use(express.static(frontendBuildPath));
 } else {
-  console.log('❌ Frontend build folder not found!');
+  console.log('â‌Œ Frontend build folder not found!');
 }
 
 if (fs.existsSync(adminBuildPath)) {
-  console.log('✅ Serving admin static files at /admin');
+  console.log('âœ… Serving admin static files at /admin');
   app.use('/admin', express.static(adminBuildPath));
 } else {
-  console.log('❌ Admin build folder not found!');
+  console.log('â‌Œ Admin build folder not found!');
 }
 
 // ---------------- REACT ROUTER FALLBACK -----------------
 app.get('/admin/*', (req, res) => {
   const indexFile = path.join(adminBuildPath, 'index.html');
-  console.log('📄 Serving admin index.html for route:', req.path);
+  console.log('ًں“„ Serving admin index.html for route:', req.path);
   return fs.existsSync(indexFile) ? res.sendFile(indexFile) : res.status(404).send('Admin not found');
 });
 
 app.get('*', (req, res) => {
   const indexFile = path.join(frontendBuildPath, 'index.html');
-  console.log('📄 Serving frontend index.html for route:', req.path);
+  console.log('ًں“„ Serving frontend index.html for route:', req.path);
   return fs.existsSync(indexFile) ? res.sendFile(indexFile) : res.status(404).send('Frontend not found');
 });
 
 // ---------------- START SERVER -----------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🌐 Frontend: http://localhost:${PORT}/`);
-  console.log(`🔧 Admin: http://localhost:${PORT}/admin/`);
+  console.log(`ًںڑ€ Server running on port ${PORT}`);
+  console.log(`ًںŒگ Frontend: http://localhost:${PORT}/`);
+  console.log(`ًں”§ Admin: http://localhost:${PORT}/admin/`);
 });
