@@ -1,4 +1,4 @@
-﻿const API_BASE = process.env.REACT_APP_API_URL || 'https://portfolio-project-p04q.onrender.com/api';
+﻿const API_BASE = 'https://portfolio-project-p04q.onrender.com/api';
 
 export const getProjects = async () => {
   const res = await fetch(`${API_BASE}/projects`);
@@ -64,4 +64,5 @@ export const login = async (username, password) => {
   });
   return res.json();
 };
+
 
