@@ -1,22 +1,18 @@
+// src/components/Hero.js
 import React from 'react';
 import heroImage from '../assets/images/hero.JPG';
 
 function Hero() {
   return (
-    // in Hero.js, replace section class line with:
-<section id="hero" className="flex flex-col md:flex-row items-center md:items-center justify-between px-6 pt-20 md:pt-28 pb-20 bg-gradient-to-r from-purple-500 to-indigo-600 text-white min-h-screen">
-
+    <section id="hero" className="flex flex-col md:flex-row items-center md:items-center justify-between px-6 pt-20 md:pt-28 pb-20 bg-gradient-to-r from-purple-500 to-indigo-600 text-white min-h-screen">
       {/* Left Side - Text */}
       <div className="md:w-1/2 flex flex-col justify-center space-y-6 md:space-y-8">
-              <h1 className="text-5xl font-bold leading-tight">
-        Hi, I'm <span className="text-white">Sam Emad</span>
-
-      </h1>
-
+        <h1 className="text-5xl font-bold leading-tight">
+          Hi, I'm <span className="text-white">Sam Emad</span>
+        </h1>
         <p className="text-xl max-w-lg">
-         Turning ideas into clean, modern, and scalable apps.
+          Turning ideas into clean, modern, and scalable apps.
         </p>
-        
         {/* Buttons */}
         <div className="flex space-x-4">
           <a

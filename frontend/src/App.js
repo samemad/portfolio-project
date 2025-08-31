@@ -14,6 +14,7 @@ import Footer from './components/Footer';
 // Admin components (copy these from admin folder)
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import './AdminApp.css'; // Import admin styles
 
 import './App.css';
 

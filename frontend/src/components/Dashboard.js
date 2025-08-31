@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
+import '../AdminApp.css';
+import '../AdminStyle.css';
 import {
   getProjects,
   getCertifications,

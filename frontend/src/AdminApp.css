@@ -1,0 +1,157 @@
+/* App general */
+.App {
+  text-align: center;
+  background-color: #121212;
+  color: #fff;
+  min-height: 100vh;
+}
+
+/* Logo */
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Navbar */
+.navbar {
+  background-color: #121212;
+  padding: 20px 40px;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-bottom: 2px solid #FF6600;
+}
+
+/* Sidebar */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  background: #121212;
+  padding: 20px;
+  gap: 20px;
+}
+
+.sidebar button {
+  padding: 15px;
+  font-size: 1.1rem;
+  color: #FF6600;
+  border: 2px solid #FF6600;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sidebar button:hover {
+  background-color: #FF6600;
+  color: #121212;
+  transform: scale(1.05);
+}
+
+/* Action containers (Add Project / Add Cert forms) */
+.action-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  max-width: 500px;
+  margin: 0 auto 40px auto;
+}
+
+.action-container h3 {
+  color: #FF6600;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* Form inputs */
+.action-container input {
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: none;
+  width: 100%;
+}
+
+/* Big buttons */
+.action-btn {
+  padding: 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: 2px solid #FF6600;
+  background: transparent;
+  color: #FF6600;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  background-color: #FF6600;
+  color: #121212;
+  transform: scale(1.05);
+}
+
+/* Delete buttons and list cards */
+.list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.list-card {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 20px;
+  background: #1e1e1e;
+  border-radius: 12px;
+  color: #fff;
+  align-items: center;
+}
+
+.delete-btn {
+  padding: 8px 15px;
+  border: 2px solid #FF3300;
+  border-radius: 12px;
+  background: transparent;
+  color: #FF3300;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+  background-color: #FF3300;
+  color: #121212;
+  transform: scale(1.05);
+}
+
+/* Page container inside Dashboard */
+.page-container {
+  padding: 40px;
+}
+.sidebar button {
+  padding: 15px;
+  font-size: 1.1rem;
+  color: #FF6600;
+  border: 2px solid #FF6600;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sidebar button:hover {
+  background-color: #FF6600;
+  color: #121212;
+  transform: scale(1.05);
+}

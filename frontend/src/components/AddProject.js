@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import '../AdminApp.css';
+import '../AdminStyle.css';
 import { ClipLoader } from 'react-spinners'; // Import the spinner
 import { addProject } from "../api.js"; // Adjust path if needed
 

@@ -20,6 +20,21 @@ export const addProject = async (data, token) => {
   return res.json();
 };
 
+export const updateProject = async (id, data, token) => {
+  const formData = new FormData();
+  formData.append('title', data.title);
+  formData.append('description', data.description);
+  formData.append('link', data.link);
+  if (data.image) formData.append('image', data.image);
+
+  const res = await fetch(`${API_BASE}/projects/${id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  return res.json();
+};
+
 export const deleteProject = async (id, token) => {
   const res = await fetch(`${API_BASE}/projects/${id}`, {
     method: 'DELETE',
@@ -48,6 +63,21 @@ export const addCertification = async (data, token) => {
   return res.json();
 };
 
+export const updateCertification = async (id, data, token) => {
+  const formData = new FormData();
+  formData.append('name', data.name);
+  formData.append('provider', data.provider);
+  formData.append('year', data.year);
+  if (data.image) formData.append('image', data.image);
+
+  const res = await fetch(`${API_BASE}/certifications/${id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  return res.json();
+};
+
 export const deleteCertification = async (id, token) => {
   const res = await fetch(`${API_BASE}/certifications/${id}`, {
     method: 'DELETE',
@@ -67,3 +97,28 @@ export const login = async (username, password) => {
 
 // Helper for image URLs
 export const BACKEND_URL = API_BASE.replace(/\/api\/?$/, "");
+
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  // If imagePath already includes the full URL, return as is
+  if (imagePath.startsWith('http')) return imagePath;
+  // Otherwise, prepend the backend URL
+  return `${BACKEND_URL}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
+};
+
+// Default export for components that import API as default
+const API = {
+  getProjects,
+  addProject,
+  updateProject,
+  deleteProject,
+  getCertifications,
+  addCertification,
+  updateCertification,
+  deleteCertification,
+  login,
+  getImageUrl,
+  BACKEND_URL
+};
+
+export default API;

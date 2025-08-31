@@ -1,5 +1,7 @@
 // src/components/Sidebar.js
 import React from "react";
+import '../AdminApp.css';
+import '../AdminStyle.css';
 
 export default function Sidebar({ setPage }) {
   return (
