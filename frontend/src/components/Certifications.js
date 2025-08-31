@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getCertifications, BACKEND_URL } from "../api"; // Use named export getCertifications
+import API, { BACKEND_URL } from "../api";
 import "./Certifications.css";
 
 export default function Certifications() {
@@ -8,8 +8,8 @@ export default function Certifications() {
   useEffect(() => {
     const fetchCerts = async () => {
       try {
-        const data = await getCertifications(); // Use getCertifications directly
-        setCerts(data);
+        const res = await API.get("/certifications");
+        setCerts(res.data);
       } catch (err) {
         console.error("Certifications fetch error:", err);
       }
