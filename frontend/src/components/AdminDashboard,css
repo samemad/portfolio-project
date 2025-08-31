@@ -147,6 +147,28 @@ body {
 .form-container input::placeholder {
   color: #ccc;
 }
+/* Form inputs - modern dark style */
+input, textarea {
+  background-color: #1c1c1c;  /* dark input background */
+  color: #fff;                 /* white text */
+  border: 2px solid #FF6600;
+  border-radius: 10px;
+  padding: 12px;
+  width: 100%;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #ccc; /* slightly dim placeholder */
+}
+
+input:focus, textarea:focus {
+  border-color: #32CD32;
+  box-shadow: 0 0 8px rgba(50, 205, 50, 0.6);
+}
 
 .form-container button {
   padding: 12px;
