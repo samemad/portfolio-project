@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import API from "../api";
+import API, { BACKEND_URL } from "../api";
 import "./Projects.css";
 
 export default function Projects() {
@@ -25,7 +25,7 @@ export default function Projects() {
           <div key={p.id} className="project-card">
             {p.image && (
               <img
-                src={`http://localhost:5000${p.image}`}
+                src={`${BACKEND_URL}${p.image}`}
                 alt={p.title}
                 className="project-image"
               />

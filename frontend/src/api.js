@@ -1,8 +1,9 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://portfolio-project-p04q.onrender.com/api"
+  baseURL: process.env.REACT_APP_API_URL
 });
+
 
 // Existing functions
 export const getProjects = () => API.get("/projects");
@@ -19,3 +20,6 @@ export const login = (data) => API.post("/login", data);
 
 // Keep the default export for backwards compatibility
 export default API;
+
+// Helper for images
+export const BACKEND_URL = process.env.REACT_APP_API_URL.replace("/api", "");

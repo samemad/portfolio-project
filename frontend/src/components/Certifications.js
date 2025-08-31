@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import API from "../api";
+import API, { BACKEND_URL } from "../api";
 import "./Certifications.css";
 
 export default function Certifications() {
@@ -25,7 +25,7 @@ export default function Certifications() {
           <div key={c.id} className="cert-card">
             {c.image && (
               <img
-                src={`http://localhost:5000${c.image}`}
+                src={`${BACKEND_URL}${c.image}`}
                 alt={c.name}
                 className="cert-image"
               />
