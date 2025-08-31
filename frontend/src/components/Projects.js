@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import API, { BACKEND_URL } from "../api";
+import { getProjects, BACKEND_URL } from "../api"; // Use named export getProjects
 import "./Projects.css";
 
 export default function Projects() {
@@ -8,8 +8,8 @@ export default function Projects() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await API.get("/projects");
-        setProjects(res.data);
+        const data = await getProjects(); // Use getProjects directly
+        setProjects(data);
       } catch (err) {
         console.error("Projects fetch error:", err);
       }
