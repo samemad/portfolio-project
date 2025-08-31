@@ -8,8 +8,9 @@ export default function Projects() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await API.get("/projects");
-        setProjects(res.data);
+        // Changed from API.get("/projects") to API.getProjects()
+        const data = await API.getProjects();
+        setProjects(data);
       } catch (err) {
         console.error("Projects fetch error:", err);
       }

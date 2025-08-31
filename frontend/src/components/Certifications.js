@@ -8,8 +8,9 @@ export default function Certifications() {
   useEffect(() => {
     const fetchCerts = async () => {
       try {
-        const res = await API.get("/certifications");
-        setCerts(res.data);
+        // Changed from API.get("/certifications") to API.getCertifications()
+        const data = await API.getCertifications();
+        setCerts(data);
       } catch (err) {
         console.error("Certifications fetch error:", err);
       }
