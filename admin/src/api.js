@@ -65,4 +65,5 @@ export const login = async (username, password) => {
   return res.json();
 };
 
-
+// Helper for image URLs
+export const BACKEND_URL = API_BASE.replace(/\/api\/?$/, "");
