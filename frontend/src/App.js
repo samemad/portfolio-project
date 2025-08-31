@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useState, useEffect, createContext } from "react";
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 
 // Main website components
 import Navbar from './components/Navbar';
@@ -75,7 +75,7 @@ function App() {
           <Routes>
             {/* Main website route */}
             <Route path="/" element={<MainWebsite />} />
-            
+                     
             {/* Admin routes */}
             <Route path="/admin/*" element={<AdminApp />} />
           </Routes>
