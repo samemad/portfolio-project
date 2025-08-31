@@ -1,5 +1,8 @@
 import axios from "axios";
 
+console.log("Environment API URL:", process.env.REACT_APP_API_URL);
+console.log("Final baseURL:", process.env.REACT_APP_API_URL || "https://portfolio-project-p04q.onrender.com/api");
+
 const API = axios.create({
   baseURL: process.env.REACT_APP_API_URL || "https://portfolio-project-p04q.onrender.com/api"
 });
