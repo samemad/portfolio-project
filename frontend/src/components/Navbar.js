@@ -1,11 +1,9 @@
 // src/components/Navbar.js
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import ThemeToggle from "./ThemeToggle";
-
 
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
