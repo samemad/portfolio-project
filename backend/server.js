@@ -235,13 +235,13 @@ app.delete('/api/certifications/:id', verifyToken, async (req, res) => {
 
 // ---------------- SERVE FRONTEND & ADMIN -----------------
 const frontendBuildPath = path.join(__dirname, '../frontend/build');
-const adminBuildPath = path.join(__dirname, '../admin/build');
+
 
 console.log('ًں“پ Build paths:');
 console.log('Frontend build path:', frontendBuildPath);
-console.log('Admin build path:', adminBuildPath);
+
 console.log('Frontend build exists:', fs.existsSync(frontendBuildPath));
-console.log('Admin build exists:', fs.existsSync(adminBuildPath));
+
 
 if (fs.existsSync(frontendBuildPath)) {
   console.log('âœ… Serving frontend static files');
@@ -250,19 +250,7 @@ if (fs.existsSync(frontendBuildPath)) {
   console.log('â‌Œ Frontend build folder not found!');
 }
 
-if (fs.existsSync(adminBuildPath)) {
-  console.log('âœ… Serving admin static files at /admin');
-  app.use('/admin', express.static(adminBuildPath));
-} else {
-  console.log('â‌Œ Admin build folder not found!');
-}
 
-// ---------------- REACT ROUTER FALLBACK -----------------
-app.get('/admin/*', (req, res) => {
-  const indexFile = path.join(adminBuildPath, 'index.html');
-  console.log('ًں“„ Serving admin index.html for route:', req.path);
-  return fs.existsSync(indexFile) ? res.sendFile(indexFile) : res.status(404).send('Admin not found');
-});
 
 app.get('*', (req, res) => {
   const indexFile = path.join(frontendBuildPath, 'index.html');
