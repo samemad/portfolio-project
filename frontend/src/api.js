@@ -1,31 +1,69 @@
-import axios from "axios";
+const API_BASE = 'https://portfolio-project-p04q.onrender.com/api';
 
-// Temporary debugging - remove after fixing
-console.log("Environment API URL:", process.env.REACT_APP_API_URL);
-console.log("Final baseURL:", process.env.REACT_APP_API_URL || "https://portfolio-project-p04q.onrender.com/api");
+export const getProjects = async () => {
+  const res = await fetch(`${API_BASE}/projects`);
+  return res.json();
+};
 
-const API = axios.create({
-  baseURL: "https://portfolio-project-p04q.onrender.com/api"
-});
+export const addProject = async (data, token) => {
+  const formData = new FormData();
+  formData.append('title', data.title);
+  formData.append('description', data.description);
+  formData.append('link', data.link);
+  if (data.image) formData.append('image', data.image);
 
-// Projects
-export const getProjects = () => API.get("/projects");
-export const addProject = (data, token) => API.post("/projects", data, {
-  headers: { Authorization: `Bearer ${token}` }
-});
-export const deleteProject = (id) => API.delete(`/projects/${id}`);
+  const res = await fetch(`${API_BASE}/projects`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  return res.json();
+};
 
-// Certifications
-export const getCertifications = () => API.get("/certifications");
-export const addCertification = (data, token) => API.post("/certifications", data, {
-  headers: { Authorization: `Bearer ${token}` }
-});
-export const deleteCertification = (id) => API.delete(`/certifications/${id}`);
+export const deleteProject = async (id, token) => {
+  const res = await fetch(`${API_BASE}/projects/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.json();
+};
 
-// Login
-export const login = (data) => API.post("/login", data);
+export const getCertifications = async () => {
+  const res = await fetch(`${API_BASE}/certifications`);
+  return res.json();
+};
 
-export default API;
+export const addCertification = async (data, token) => {
+  const formData = new FormData();
+  formData.append('name', data.name);
+  formData.append('provider', data.provider);
+  formData.append('year', data.year);
+  if (data.image) formData.append('image', data.image);
 
-// Helper for image URLs (remove trailing "/api")
-export const BACKEND_URL = (process.env.REACT_APP_API_URL || "https://portfolio-project-p04q.onrender.com/api").replace(/\/api\/?$/, "");
+  const res = await fetch(`${API_BASE}/certifications`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  return res.json();
+};
+
+export const deleteCertification = async (id, token) => {
+  const res = await fetch(`${API_BASE}/certifications/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.json();
+};
+
+export const login = async (username, password) => {
+  const res = await fetch(`${API_BASE}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+  return res.json();
+};
+
+// Helper for image URLs
+export const BACKEND_URL = API_BASE.replace(/\/api\/?$/, "");
