@@ -5,20 +5,15 @@ export const getProjects = async () => {
   return res.json();
 };
 
-export const addProject = async (data, token) => {
-  const formData = new FormData();
-  formData.append('title', data.title);
-  formData.append('description', data.description);
-  formData.append('link', data.link);
-  if (data.image) formData.append('image', data.image);
-
+export const addProject = async (formData, token) => {
   const res = await fetch(`${API_BASE}/projects`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
-    body: formData,
+    body: formData, // use directly
   });
   return res.json();
 };
+
 
 export const updateProject = async (id, data, token) => {
   const formData = new FormData();
