@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL
+  baseURL: "https://portfolio-project-p04q.onrender.com/api"
 });
 
 // Existing functions
