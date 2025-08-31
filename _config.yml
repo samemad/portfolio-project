@@ -1,5 +1,5 @@
-baseurl: "/portfolio-project"
-url: "https://samemad.github.io"
+url: "https://devsam.icu"
+baseurl: ""
 exclude:
   - node_modules/
   - admin/node_modules/
