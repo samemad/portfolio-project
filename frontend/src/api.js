@@ -22,10 +22,10 @@ export const addProject = async (data, token) => {
 
 export const updateProject = async (id, data, token) => {
   const formData = new FormData();
-  formData.append('title', data.title);
-  formData.append('description', data.description);
-  formData.append('link', data.link);
-  if (data.image) formData.append('image', data.image);
+   if (data.title) formData.append('title', data.title);
+   if (data.description) formData.append('description', data.description);
+   if (data.link) formData.append('link', data.link);
+   if (data.image) formData.append('image', data.image);
 
   const res = await fetch(`${API_BASE}/projects/${id}`, {
     method: 'PUT',
@@ -65,9 +65,9 @@ export const addCertification = async (data, token) => {
 
 export const updateCertification = async (id, data, token) => {
   const formData = new FormData();
-  formData.append('name', data.name);
-  formData.append('provider', data.provider);
-  formData.append('year', data.year);
+  if (data.title) formData.append('name', data.name);
+  if (data.description) formData.append('provider', data.provider);
+  if (data.link) formData.append('year', data.year);
   if (data.image) formData.append('image', data.image);
 
   const res = await fetch(`${API_BASE}/certifications/${id}`, {
