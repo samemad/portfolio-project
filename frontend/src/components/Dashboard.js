@@ -13,7 +13,7 @@ import {
 import AddProject from "./AddProject";
 import AddCert from "./AddCert";
 
-export default function Dashboard() {
+export default function Dashboard({ token }) { // Accept token as prop
   const [projects, setProjects] = useState([]);
   const [certs, setCerts] = useState([]);
   const [currentPage, setCurrentPage] = useState("welcome");
@@ -38,7 +38,7 @@ export default function Dashboard() {
   const handleDeleteProject = async (id) => {
     try {
       console.log("Deleting project ID:", id);
-      await deleteProject(id);
+      await deleteProject(id, token); // Pass token
       setProjects(projects.filter((p) => p.id !== id));
     } catch (err) {
       console.error("Error deleting project:", err);
@@ -49,7 +49,7 @@ export default function Dashboard() {
   const handleDeleteCert = async (id) => {
     try {
       console.log("Deleting certification ID:", id);
-      await deleteCertification(id);
+      await deleteCertification(id, token); // Pass token
       setCerts(certs.filter((c) => c.id !== id));
     } catch (err) {
       console.error("Error deleting certification:", err);
@@ -66,9 +66,9 @@ export default function Dashboard() {
     const formData = new FormData(e.target);
     try {
       if (editItem.type === "project") {
-        await updateProject(editItem.id, formData);
+        await updateProject(editItem.id, formData, token); // Pass token
       } else {
-        await updateCertification(editItem.id, formData);
+        await updateCertification(editItem.id, formData, token); // Pass token
       }
       fetchData(); // Refresh data
       setEditItem(null); // Close edit form
@@ -94,7 +94,7 @@ export default function Dashboard() {
         {currentPage === "projects" && (
           <>
             <h2 style={{ marginBottom: "20px" }}>Projects</h2>
-            <AddProject refresh={fetchData} />
+            <AddProject refresh={fetchData} token={token} />
             <div className="list-container" style={{ marginTop: "20px" }}>
               {projects.map((p) => (
                 <div
@@ -185,35 +185,12 @@ export default function Dashboard() {
                 </form>
               </div>
             )}
-            {editItem && editItem.type === "certification" && (
-              <div style={{ marginTop: "20px", padding: "20px", border: "2px solid #32CD32", borderRadius: "10px" }}>
-                <h3>Edit Certification</h3>
-                {/* Show current image if exists */}
-                {editItem.image && (
-                  <div style={{ marginBottom: "10px" }}>
-                    <img
-                      src={getImageUrl(editItem.image)}
-                      alt="Certification preview"
-                      style={{ maxWidth: "200px", borderRadius: "8px" }}
-                    />
-                  </div>
-                )}
-                <form onSubmit={saveEdit}>
-                  <input name="name" defaultValue={editItem.name} placeholder="Name" required />
-                  <input name="provider" defaultValue={editItem.provider} placeholder="Provider" />
-                  <input name="year" defaultValue={editItem.year} placeholder="Year" />
-                  <input type="file" name="image" />
-                  <button type="submit">Save</button>
-                  <button type="button" onClick={() => setEditItem(null)}>Cancel</button>
-                </form>
-              </div>
-            )}
           </>
         )}
         {currentPage === "certifications" && (
           <>
             <h2 style={{ marginBottom: "20px" }}>Certifications</h2>
-            <AddCert refresh={fetchData} />
+            <AddCert refresh={fetchData} token={token} />
             <div className="list-container" style={{ marginTop: "20px" }}>
               {certs.map((c) => (
                 <div
@@ -281,29 +258,6 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-            {editItem && editItem.type === "project" && (
-              <div style={{ marginTop: "20px", padding: "20px", border: "2px solid #32CD32", borderRadius: "10px" }}>
-                <h3>Edit Project</h3>
-                {/* Show current image if exists */}
-                {editItem.image && (
-                  <div style={{ marginBottom: "10px" }}>
-                    <img
-                      src={getImageUrl(editItem.image)}
-                      alt="Project preview"
-                      style={{ maxWidth: "200px", borderRadius: "8px" }}
-                    />
-                  </div>
-                )}
-                <form onSubmit={saveEdit}>
-                  <input name="title" defaultValue={editItem.title} placeholder="Title" required />
-                  <input name="description" defaultValue={editItem.description} placeholder="Description" />
-                  <input name="link" defaultValue={editItem.link} placeholder="Link" />
-                  <input type="file" name="image" />
-                  <button type="submit">Save</button>
-                  <button type="button" onClick={() => setEditItem(null)}>Cancel</button>
-                </form>
-              </div>
-            )}
             {editItem && editItem.type === "certification" && (
               <div style={{ marginTop: "20px", padding: "20px", border: "2px solid #32CD32", borderRadius: "10px" }}>
                 <h3>Edit Certification</h3>

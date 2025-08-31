@@ -4,7 +4,7 @@ import '../AdminStyle.css';
 import { ClipLoader } from 'react-spinners'; // Import the spinner
 import { addCertification } from "../api.js"; // Adjust path if needed
 
-export default function AddCert({ refresh }) {
+export default function AddCert({ refresh, token }) { // Accept token prop
   const [name, setName] = useState("");
   const [provider, setProvider] = useState("");
   const [year, setYear] = useState("");
@@ -22,7 +22,7 @@ export default function AddCert({ refresh }) {
     setLoading(true); // Start loading
     try {
       console.log("Attempting to add certification");
-      const data = await addCertification(formData);
+      const data = await addCertification(formData, token); // Pass token
       console.log("Certification added successfully:", data);
       setName(""); setProvider(""); setYear(""); setImage(null);
       refresh();
@@ -35,7 +35,7 @@ export default function AddCert({ refresh }) {
       if (error.response?.status === 403 && error.response?.data?.message === 'Invalid token') {
         alert("Session expired. Please log in again.");
         localStorage.removeItem("token");
-        window.location.href = "/admin";
+        window.location.href = "/#/admin"; // Updated for HashRouter
       } else {
         alert(`Failed to add certification: ${error.response?.data?.message || error.message}`);
       }

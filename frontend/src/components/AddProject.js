@@ -4,7 +4,7 @@ import '../AdminStyle.css';
 import { ClipLoader } from 'react-spinners'; // Import the spinner
 import { addProject } from "../api.js"; // Adjust path if needed
 
-export default function AddProject({ refresh }) {
+export default function AddProject({ refresh, token }) { // Accept token prop
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [link, setLink] = useState("");
@@ -22,7 +22,7 @@ export default function AddProject({ refresh }) {
     setLoading(true); // Start loading
     try {
       console.log("Attempting to add project");
-      const data = await addProject(formData);
+      const data = await addProject(formData, token); // Pass token
       console.log("Project added successfully:", data);
       setTitle(""); setDescription(""); setLink(""); setImage(null);
       refresh();
@@ -35,7 +35,7 @@ export default function AddProject({ refresh }) {
       if (error.response?.status === 403 && error.response?.data?.message === 'Invalid token') {
         alert("Session expired. Please log in again.");
         localStorage.removeItem("token");
-        window.location.href = "/admin";
+        window.location.href = "/#/admin"; // Updated for HashRouter
       } else {
         alert(`Failed to add project: ${error.response?.data?.message || error.message}`);
       }
