@@ -9,15 +9,15 @@ import {
   updateProject,
   updateCertification,
   getImageUrl,
-} from "../api.js"; // Adjust path if needed (from components to root src)
+} from "../api.js";
 import AddProject from "./AddProject";
 import AddCert from "./AddCert";
 
-export default function Dashboard({ token }) { // Accept token as prop
+export default function Dashboard({ token }) {
   const [projects, setProjects] = useState([]);
   const [certs, setCerts] = useState([]);
   const [currentPage, setCurrentPage] = useState("welcome");
-  const [editItem, setEditItem] = useState(null); // State for editing
+  const [editItem, setEditItem] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -38,7 +38,7 @@ export default function Dashboard({ token }) { // Accept token as prop
   const handleDeleteProject = async (id) => {
     try {
       console.log("Deleting project ID:", id);
-      await deleteProject(id, token); // Pass token
+      await deleteProject(id, token);
       setProjects(projects.filter((p) => p.id !== id));
     } catch (err) {
       console.error("Error deleting project:", err);
@@ -49,7 +49,7 @@ export default function Dashboard({ token }) { // Accept token as prop
   const handleDeleteCert = async (id) => {
     try {
       console.log("Deleting certification ID:", id);
-      await deleteCertification(id, token); // Pass token
+      await deleteCertification(id, token);
       setCerts(certs.filter((c) => c.id !== id));
     } catch (err) {
       console.error("Error deleting certification:", err);
@@ -61,28 +61,28 @@ export default function Dashboard({ token }) { // Accept token as prop
     setEditItem({ ...item, type });
   };
 
- const saveEdit = async (e) => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
+  const saveEdit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
 
-  // Keep old image if no new file selected
-  if (!formData.get("image") && editItem.image) {
-    formData.append("image", editItem.image);
-  }
-
-  try {
-    if (editItem.type === "project") {
-      await updateProject(editItem.id, formData, token);
-    } else {
-      await updateCertification(editItem.id, formData, token);
+    // Keep old image if no new file selected
+    if (!formData.get("image") && editItem.image) {
+      formData.append("image", editItem.image);
     }
-    fetchData(); // Refresh data
-    setEditItem(null); // Close edit form
-  } catch (err) {
-    console.error("Error updating item:", err);
-    alert(`Failed to update: ${err.response?.data?.message || err.message}`);
-  }
-};
+
+    try {
+      if (editItem.type === "project") {
+        await updateProject(editItem.id, formData, token);
+      } else {
+        await updateCertification(editItem.id, formData, token);
+      }
+      fetchData();
+      setEditItem(null);
+    } catch (err) {
+      console.error("Error updating item:", err);
+      alert(`Failed to update: ${err.response?.data?.message || err.message}`);
+    }
+  };
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#121212", color: "#fff" }}>
@@ -91,12 +91,14 @@ export default function Dashboard({ token }) { // Accept token as prop
         <button onClick={() => setCurrentPage("projects")}>Projects</button>
         <button onClick={() => setCurrentPage("certifications")}>Certifications</button>
       </div>
+
       <div className="page-container" style={{ flex: 1, padding: "40px" }}>
         {currentPage === "welcome" && (
           <h1 style={{ textAlign: "center", marginTop: "100px", fontSize: "2rem" }}>
             Welcome My Uncle 😎
           </h1>
         )}
+
         {currentPage === "projects" && (
           <>
             <h2 style={{ marginBottom: "20px" }}>Projects</h2>
@@ -117,7 +119,17 @@ export default function Dashboard({ token }) { // Accept token as prop
                     backgroundColor: "#1c1c1c",
                   }}
                 >
-                  <span>{p.title}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                    {p.image && (
+                      <img
+                        src={getImageUrl(p.image)}
+                        alt={p.title}
+                        style={{ maxWidth: "80px", borderRadius: "5px" }}
+                      />
+                    )}
+                    <span>{p.title}</span>
+                  </div>
+
                   <div>
                     <button
                       onClick={() => startEdit(p, "project")}
@@ -131,14 +143,8 @@ export default function Dashboard({ token }) { // Accept token as prop
                         marginRight: "10px",
                         transition: "all 0.3s ease",
                       }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = "#32CD32";
-                        e.target.style.color = "#121212";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = "transparent";
-                        e.target.style.color = "#32CD32";
-                      }}
+                      onMouseEnter={(e) => { e.target.style.backgroundColor = "#32CD32"; e.target.style.color = "#121212"; }}
+                      onMouseLeave={(e) => { e.target.style.backgroundColor = "transparent"; e.target.style.color = "#32CD32"; }}
                     >
                       Edit
                     </button>
@@ -153,14 +159,8 @@ export default function Dashboard({ token }) { // Accept token as prop
                         cursor: "pointer",
                         transition: "all 0.3s ease",
                       }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = "#FF6600";
-                        e.target.style.color = "#121212";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = "transparent";
-                        e.target.style.color = "#FF6600";
-                      }}
+                      onMouseEnter={(e) => { e.target.style.backgroundColor = "#FF6600"; e.target.style.color = "#121212"; }}
+                      onMouseLeave={(e) => { e.target.style.backgroundColor = "transparent"; e.target.style.color = "#FF6600"; }}
                     >
                       Delete
                     </button>
@@ -168,10 +168,10 @@ export default function Dashboard({ token }) { // Accept token as prop
                 </div>
               ))}
             </div>
+
             {editItem && editItem.type === "project" && (
               <div style={{ marginTop: "20px", padding: "20px", border: "2px solid #32CD32", borderRadius: "10px" }}>
                 <h3>Edit Project</h3>
-                {/* Show current image if exists */}
                 {editItem.image && (
                   <div style={{ marginBottom: "10px" }}>
                     <img
@@ -193,6 +193,7 @@ export default function Dashboard({ token }) { // Accept token as prop
             )}
           </>
         )}
+
         {currentPage === "certifications" && (
           <>
             <h2 style={{ marginBottom: "20px" }}>Certifications</h2>
@@ -213,7 +214,17 @@ export default function Dashboard({ token }) { // Accept token as prop
                     backgroundColor: "#1c1c1c",
                   }}
                 >
-                  <span>{c.name} ({c.provider})</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                    {c.image && (
+                      <img
+                        src={getImageUrl(c.image)}
+                        alt={c.name}
+                        style={{ maxWidth: "80px", borderRadius: "5px" }}
+                      />
+                    )}
+                    <span>{c.name} ({c.provider})</span>
+                  </div>
+
                   <div>
                     <button
                       onClick={() => startEdit(c, "certification")}
@@ -227,14 +238,8 @@ export default function Dashboard({ token }) { // Accept token as prop
                         marginRight: "10px",
                         transition: "all 0.3s ease",
                       }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = "#32CD32";
-                        e.target.style.color = "#121212";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = "transparent";
-                        e.target.style.color = "#32CD32";
-                      }}
+                      onMouseEnter={(e) => { e.target.style.backgroundColor = "#32CD32"; e.target.style.color = "#121212"; }}
+                      onMouseLeave={(e) => { e.target.style.backgroundColor = "transparent"; e.target.style.color = "#32CD32"; }}
                     >
                       Edit
                     </button>
@@ -249,14 +254,8 @@ export default function Dashboard({ token }) { // Accept token as prop
                         cursor: "pointer",
                         transition: "all 0.3s ease",
                       }}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = "#FF6600";
-                        e.target.style.color = "#121212";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = "transparent";
-                        e.target.style.color = "#FF6600";
-                      }}
+                      onMouseEnter={(e) => { e.target.style.backgroundColor = "#FF6600"; e.target.style.color = "#121212"; }}
+                      onMouseLeave={(e) => { e.target.style.backgroundColor = "transparent"; e.target.style.color = "#FF6600"; }}
                     >
                       Delete
                     </button>
@@ -264,10 +263,10 @@ export default function Dashboard({ token }) { // Accept token as prop
                 </div>
               ))}
             </div>
+
             {editItem && editItem.type === "certification" && (
               <div style={{ marginTop: "20px", padding: "20px", border: "2px solid #32CD32", borderRadius: "10px" }}>
                 <h3>Edit Certification</h3>
-                {/* Show current image if exists */}
                 {editItem.image && (
                   <div style={{ marginBottom: "10px" }}>
                     <img

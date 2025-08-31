@@ -37,20 +37,16 @@ export const getCertifications = async () => {
   return res.json();
 };
 
-export const addCertification = async (data, token) => {
-  const formData = new FormData();
-  formData.append('name', data.name);
-  formData.append('provider', data.provider);
-  formData.append('year', data.year);
-  if (data.image) formData.append('image', data.image);
-
+// api.js
+export const addCertification = async (formData, token) => {
   const res = await fetch(`${API_BASE}/certifications`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData,
+    headers: { Authorization: `Bearer ${token}` }, // do NOT set Content-Type, browser sets it automatically
+    body: formData, // send FormData directly
   });
   return res.json();
 };
+
 
 export const updateCertification = async (id, formData, token) => {
   const res = await fetch(`${API_BASE}/certifications/${id}`, {
