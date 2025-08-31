@@ -61,22 +61,28 @@ export default function Dashboard({ token }) { // Accept token as prop
     setEditItem({ ...item, type });
   };
 
-  const saveEdit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    try {
-      if (editItem.type === "project") {
-        await updateProject(editItem.id, formData, token); // Pass token
-      } else {
-        await updateCertification(editItem.id, formData, token); // Pass token
-      }
-      fetchData(); // Refresh data
-      setEditItem(null); // Close edit form
-    } catch (err) {
-      console.error("Error updating item:", err);
-      alert(`Failed to update: ${err.response?.data?.message || err.message}`);
+ const saveEdit = async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+
+  // Keep old image if no new file selected
+  if (!formData.get("image") && editItem.image) {
+    formData.append("image", editItem.image);
+  }
+
+  try {
+    if (editItem.type === "project") {
+      await updateProject(editItem.id, formData, token);
+    } else {
+      await updateCertification(editItem.id, formData, token);
     }
-  };
+    fetchData(); // Refresh data
+    setEditItem(null); // Close edit form
+  } catch (err) {
+    console.error("Error updating item:", err);
+    alert(`Failed to update: ${err.response?.data?.message || err.message}`);
+  }
+};
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#121212", color: "#fff" }}>

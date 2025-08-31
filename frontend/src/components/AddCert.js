@@ -11,38 +11,26 @@ export default function AddCert({ refresh, token }) { // Accept token prop
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false); // State for loading
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("provider", provider);
-    formData.append("year", year);
-    if (image) formData.append("image", image);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("provider", provider);
+  formData.append("year", year);
+  if (image) formData.append("image", image);
 
-    setLoading(true); // Start loading
-    try {
-      console.log("Attempting to add certification");
-      const data = await addCertification(formData, token); // Pass token
-      console.log("Certification added successfully:", data);
-      setName(""); setProvider(""); setYear(""); setImage(null);
-      refresh();
-    } catch (error) {
-      console.error("Error adding certification:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      if (error.response?.status === 403 && error.response?.data?.message === 'Invalid token') {
-        alert("Session expired. Please log in again.");
-        localStorage.removeItem("token");
-        window.location.href = "/#/admin"; // Updated for HashRouter
-      } else {
-        alert(`Failed to add certification: ${error.response?.data?.message || error.message}`);
-      }
-    } finally {
-      setLoading(false); // Stop loading whether success or failure
-    }
-  };
+  setLoading(true);
+  try {
+    await addCertification(formData, token); // FormData directly
+    setName(""); setProvider(""); setYear(""); setImage(null);
+    refresh();
+  } catch (err) {
+    console.error("Failed to add certification:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="action-container">
