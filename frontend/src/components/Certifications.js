@@ -11,7 +11,7 @@ export default function Certifications() {
         const res = await API.get("/certifications");
         setCerts(res.data);
       } catch (err) {
-        console.error(err);
+        console.error("Certifications fetch error:", err);
       }
     };
     fetchCerts();

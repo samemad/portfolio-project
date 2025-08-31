@@ -11,7 +11,7 @@ export default function Projects() {
         const res = await API.get("/projects");
         setProjects(res.data);
       } catch (err) {
-        console.error(err);
+        console.error("Projects fetch error:", err);
       }
     };
     fetchProjects();
