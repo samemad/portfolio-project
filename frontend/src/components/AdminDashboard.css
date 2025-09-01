@@ -168,7 +168,7 @@ body {
   margin-bottom: 15px;
 }
 
-.form-container input[type="text"],
+/* .form-container input[type="text"],
 .form-container input[type="file"],
 .form-container input[type="number"] {
   width: 100%;
@@ -177,8 +177,8 @@ body {
   border-radius: 10px;
   border: none;
   background-color: #2c2c2c;
-  color: #2c2c2c; /* White text for visibility */
-}
+  color: #2c2c2c; } White text for visibility */
+
 
 .form-container input::placeholder {
   color: #ccc;
