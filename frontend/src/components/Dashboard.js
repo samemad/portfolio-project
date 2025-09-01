@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import '../AdminApp.css';
-import '../AdminStyle.css';
+import '../AdminDashboard.css'; // Combined new CSS
 import {
   getProjects,
   getCertifications,
@@ -21,7 +20,6 @@ export default function Dashboard({ token }) {
 
   const fetchData = useCallback(async () => {
     try {
-      console.log("Fetching data");
       const projData = await getProjects();
       const certData = await getCertifications();
       setProjects(projData);
@@ -37,157 +35,84 @@ export default function Dashboard({ token }) {
 
   const handleDeleteProject = async (id) => {
     try {
-      console.log("Deleting project ID:", id);
       await deleteProject(id, token);
       setProjects(projects.filter((p) => p.id !== id));
     } catch (err) {
-      console.error("Error deleting project:", err);
-      alert(`Failed to delete project: ${err.response?.data?.message || err.message}`);
+      alert(`Failed to delete project: ${err.message}`);
     }
   };
 
   const handleDeleteCert = async (id) => {
     try {
-      console.log("Deleting certification ID:", id);
       await deleteCertification(id, token);
       setCerts(certs.filter((c) => c.id !== id));
     } catch (err) {
-      console.error("Error deleting certification:", err);
-      alert(`Failed to delete certification: ${err.response?.data?.message || err.message}`);
+      alert(`Failed to delete certification: ${err.message}`);
     }
   };
 
-  const startEdit = (item, type) => {
-    setEditItem({ ...item, type });
-  };
+  const startEdit = (item, type) => setEditItem({ ...item, type });
 
   const saveEdit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-
-    // Keep old image if no new file selected
-    if (!formData.get("image") && editItem.image) {
-      formData.append("image", editItem.image);
-    }
+    if (!formData.get("image") && editItem.image) formData.append("image", editItem.image);
 
     try {
-      if (editItem.type === "project") {
-        await updateProject(editItem.id, formData, token);
-      } else {
-        await updateCertification(editItem.id, formData, token);
-      }
+      if (editItem.type === "project") await updateProject(editItem.id, formData, token);
+      else await updateCertification(editItem.id, formData, token);
       fetchData();
       setEditItem(null);
     } catch (err) {
-      console.error("Error updating item:", err);
-      alert(`Failed to update: ${err.response?.data?.message || err.message}`);
+      alert(`Failed to update: ${err.message}`);
     }
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#121212", color: "#fff" }}>
-      <div className="sidebar" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "20px", minWidth: "200px" }}>
+    <div className="App">
+      {/* Sidebar */}
+      <div className="sidebar">
         <button onClick={() => setCurrentPage("welcome")}>Welcome</button>
-        <button onClick={() => setCurrentPage("projects")}>Projects</button>
-        <button onClick={() => setCurrentPage("certifications")}>Certifications</button>
+        <button onClick={() => setCurrentPage("projects")}>Add Projects</button>
+        <button onClick={() => setCurrentPage("certifications")}>Add Certifications</button>
       </div>
 
-      <div className="page-container" style={{ flex: 1, padding: "40px" }}>
+      {/* Main Page */}
+      <div className="page-container">
         {currentPage === "welcome" && (
-          <h1 style={{ textAlign: "center", marginTop: "100px", fontSize: "2rem" }}>
-            Welcome My Uncle 😎
-          </h1>
+          <h1 className="welcome-title">Welcome My Uncle 😎</h1>
         )}
 
         {currentPage === "projects" && (
           <>
-            <h2 style={{ marginBottom: "20px" }}>Projects</h2>
+            <h2 className="section-title">Projects</h2>
             <AddProject refresh={fetchData} token={token} />
-            <div className="list-container" style={{ marginTop: "20px" }}>
+            <div className="list-container">
               {projects.map((p) => (
-                <div
-                  key={p.id}
-                  className="list-card"
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "15px",
-                    marginBottom: "10px",
-                    border: "2px solid #FF6600",
-                    borderRadius: "12px",
-                    backgroundColor: "#1c1c1c",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                    {p.image && (
-                      <img
-                        src={getImageUrl(p.image)}
-                        alt={p.title}
-                        style={{ maxWidth: "80px", borderRadius: "5px" }}
-                      />
-                    )}
+                <div key={p.id} className="list-card">
+                  <div className="card-left">
+                    {p.image && <img src={getImageUrl(p.image)} alt={p.title} />}
                     <span>{p.title}</span>
                   </div>
-
-                  <div>
-                    <button
-                      onClick={() => startEdit(p, "project")}
-                      style={{
-                        padding: "8px 15px",
-                        border: "2px solid #32CD32",
-                        borderRadius: "10px",
-                        background: "transparent",
-                        color: "#32CD32",
-                        cursor: "pointer",
-                        marginRight: "10px",
-                        transition: "all 0.3s ease",
-                      }}
-                      onMouseEnter={(e) => { e.target.style.backgroundColor = "#32CD32"; e.target.style.color = "#121212"; }}
-                      onMouseLeave={(e) => { e.target.style.backgroundColor = "transparent"; e.target.style.color = "#32CD32"; }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProject(p.id)}
-                      style={{
-                        padding: "8px 15px",
-                        border: "2px solid #FF6600",
-                        borderRadius: "10px",
-                        background: "transparent",
-                        color: "#FF6600",
-                        cursor: "pointer",
-                        transition: "all 0.3s ease",
-                      }}
-                      onMouseEnter={(e) => { e.target.style.backgroundColor = "#FF6600"; e.target.style.color = "#121212"; }}
-                      onMouseLeave={(e) => { e.target.style.backgroundColor = "transparent"; e.target.style.color = "#FF6600"; }}
-                    >
-                      Delete
-                    </button>
+                  <div className="card-right">
+                    <button className="edit-btn" onClick={() => startEdit(p, "project")}>Edit</button>
+                    <button className="delete-btn" onClick={() => handleDeleteProject(p.id)}>Delete</button>
                   </div>
                 </div>
               ))}
             </div>
 
             {editItem && editItem.type === "project" && (
-              <div style={{ marginTop: "20px", padding: "20px", border: "2px solid #32CD32", borderRadius: "10px" }}>
+              <div className="edit-box">
                 <h3>Edit Project</h3>
-                {editItem.image && (
-                  <div style={{ marginBottom: "10px" }}>
-                    <img
-                      src={getImageUrl(editItem.image)}
-                      alt="Project preview"
-                      style={{ maxWidth: "200px", borderRadius: "8px" }}
-                    />
-                  </div>
-                )}
+                {editItem.image && <img src={getImageUrl(editItem.image)} alt="Project preview" />}
                 <form onSubmit={saveEdit}>
                   <input name="title" defaultValue={editItem.title} placeholder="Title" required />
                   <input name="description" defaultValue={editItem.description} placeholder="Description" />
                   <input name="link" defaultValue={editItem.link} placeholder="Link" />
                   <input type="file" name="image" />
-                  <button type="submit">Save</button>
-                  <button type="button" onClick={() => setEditItem(null)}>Cancel</button>
+                  <button type="submit" className="action-btn">Save</button>
+                  <button type="button" className="action-btn" onClick={() => setEditItem(null)}>Cancel</button>
                 </form>
               </div>
             )}
@@ -196,93 +121,34 @@ export default function Dashboard({ token }) {
 
         {currentPage === "certifications" && (
           <>
-            <h2 style={{ marginBottom: "20px" }}>Certifications</h2>
+            <h2 className="section-title">Certifications</h2>
             <AddCert refresh={fetchData} token={token} />
-            <div className="list-container" style={{ marginTop: "20px" }}>
+            <div className="list-container">
               {certs.map((c) => (
-                <div
-                  key={c.id}
-                  className="list-card"
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "15px",
-                    marginBottom: "10px",
-                    border: "2px solid #FF6600",
-                    borderRadius: "12px",
-                    backgroundColor: "#1c1c1c",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-                    {c.image && (
-                      <img
-                        src={getImageUrl(c.image)}
-                        alt={c.name}
-                        style={{ maxWidth: "80px", borderRadius: "5px" }}
-                      />
-                    )}
+                <div key={c.id} className="list-card">
+                  <div className="card-left">
+                    {c.image && <img src={getImageUrl(c.image)} alt={c.name} />}
                     <span>{c.name} ({c.provider})</span>
                   </div>
-
-                  <div>
-                    <button
-                      onClick={() => startEdit(c, "certification")}
-                      style={{
-                        padding: "8px 15px",
-                        border: "2px solid #32CD32",
-                        borderRadius: "10px",
-                        background: "transparent",
-                        color: "#32CD32",
-                        cursor: "pointer",
-                        marginRight: "10px",
-                        transition: "all 0.3s ease",
-                      }}
-                      onMouseEnter={(e) => { e.target.style.backgroundColor = "#32CD32"; e.target.style.color = "#121212"; }}
-                      onMouseLeave={(e) => { e.target.style.backgroundColor = "transparent"; e.target.style.color = "#32CD32"; }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteCert(c.id)}
-                      style={{
-                        padding: "8px 15px",
-                        border: "2px solid #FF6600",
-                        borderRadius: "10px",
-                        background: "transparent",
-                        color: "#FF6600",
-                        cursor: "pointer",
-                        transition: "all 0.3s ease",
-                      }}
-                      onMouseEnter={(e) => { e.target.style.backgroundColor = "#FF6600"; e.target.style.color = "#121212"; }}
-                      onMouseLeave={(e) => { e.target.style.backgroundColor = "transparent"; e.target.style.color = "#FF6600"; }}
-                    >
-                      Delete
-                    </button>
+                  <div className="card-right">
+                    <button className="edit-btn" onClick={() => startEdit(c, "certification")}>Edit</button>
+                    <button className="delete-btn" onClick={() => handleDeleteCert(c.id)}>Delete</button>
                   </div>
                 </div>
               ))}
             </div>
 
             {editItem && editItem.type === "certification" && (
-              <div style={{ marginTop: "20px", padding: "20px", border: "2px solid #32CD32", borderRadius: "10px" }}>
+              <div className="edit-box">
                 <h3>Edit Certification</h3>
-                {editItem.image && (
-                  <div style={{ marginBottom: "10px" }}>
-                    <img
-                      src={getImageUrl(editItem.image)}
-                      alt="Certification preview"
-                      style={{ maxWidth: "200px", borderRadius: "8px" }}
-                    />
-                  </div>
-                )}
+                {editItem.image && <img src={getImageUrl(editItem.image)} alt="Certification preview" />}
                 <form onSubmit={saveEdit}>
                   <input name="name" defaultValue={editItem.name} placeholder="Name" required />
                   <input name="provider" defaultValue={editItem.provider} placeholder="Provider" />
                   <input name="year" defaultValue={editItem.year} placeholder="Year" />
                   <input type="file" name="image" />
-                  <button type="submit">Save</button>
-                  <button type="button" onClick={() => setEditItem(null)}>Cancel</button>
+                  <button type="submit" className="action-btn">Save</button>
+                  <button type="button" className="action-btn" onClick={() => setEditItem(null)}>Cancel</button>
                 </form>
               </div>
             )}

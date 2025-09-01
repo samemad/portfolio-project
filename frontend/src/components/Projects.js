@@ -1,3 +1,5 @@
+
+// Projects.js
 import React, { useEffect, useState } from "react";
 import API, { BACKEND_URL } from "../api";
 import "./Projects.css";
@@ -8,7 +10,6 @@ export default function Projects() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        // Changed from API.get("/projects") to API.getProjects()
         const data = await API.getProjects();
         setProjects(data);
       } catch (err) {
@@ -18,6 +19,17 @@ export default function Projects() {
     fetchProjects();
   }, []);
 
+  // Helper function to handle image URLs
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return '';
+    // If it's already a full URL (Cloudinary), use as-is
+    if (imagePath.startsWith('https://') || imagePath.startsWith('http://')) {
+      return imagePath;
+    }
+    // If it's a local path, add backend URL
+    return `${BACKEND_URL}${imagePath}`;
+  };
+
   return (
     <section id="projects" className="projects-section">
       <h2 className="section-title">Projects</h2>
@@ -26,7 +38,7 @@ export default function Projects() {
           <div key={p.id} className="project-card">
             {p.image && (
               <img
-                src={`${BACKEND_URL}${p.image}`}
+                src={getImageUrl(p.image)}
                 alt={p.title}
                 className="project-image"
               />

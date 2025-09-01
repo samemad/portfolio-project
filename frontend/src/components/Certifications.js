@@ -1,3 +1,5 @@
+
+// Certifications.js
 import React, { useEffect, useState } from "react";
 import API, { BACKEND_URL } from "../api";
 import "./Certifications.css";
@@ -8,7 +10,6 @@ export default function Certifications() {
   useEffect(() => {
     const fetchCerts = async () => {
       try {
-        // Changed from API.get("/certifications") to API.getCertifications()
         const data = await API.getCertifications();
         setCerts(data);
       } catch (err) {
@@ -18,6 +19,17 @@ export default function Certifications() {
     fetchCerts();
   }, []);
 
+  // Helper function to handle image URLs
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return '';
+    // If it's already a full URL (Cloudinary), use as-is
+    if (imagePath.startsWith('https://') || imagePath.startsWith('http://')) {
+      return imagePath;
+    }
+    // If it's a local path, add backend URL
+    return `${BACKEND_URL}${imagePath}`;
+  };
+
   return (
     <section className="certs-section">
       <h2 className="section-title">Certifications</h2>
@@ -26,7 +38,7 @@ export default function Certifications() {
           <div key={c.id} className="cert-card">
             {c.image && (
               <img
-                src={`${BACKEND_URL}${c.image}`}
+                src={getImageUrl(c.image)}
                 alt={c.name}
                 className="cert-image"
               />
