@@ -1,5 +1,6 @@
 // src/components/Hero.js
 import React from 'react';
+import { HashLink } from 'react-router-hash-link';
 import heroImage from '../assets/images/hero.JPG';
 
 function Hero() {
@@ -14,13 +15,14 @@ function Hero() {
           Turning ideas into clean, modern, and scalable apps.
         </p>
         {/* Buttons */}
-        <div className="flex space-x-4">
-          <a
-            href="#projects"
-            className="px-6 py-3 bg-white text-purple-600 font-semibold rounded-lg hover:bg-gray-200 transition"
-          >
-            View Projects
-          </a>
+        <div className="flex space-x-4">     
+            <HashLink 
+              smooth 
+              to="#projects"
+              className="px-6 py-3 bg-white text-purple-600 font-semibold rounded-lg hover:bg-gray-200 transition"
+            >
+              View Projects
+            </HashLink>
           <a
             href="/cv.pdf"
             download="MyCV.pdf"

@@ -97,6 +97,76 @@
     padding-top: 40px; /* Ensure navbar clearance */
   }
 }
+html {
+  scroll-behavior: smooth;
+}
+/* Global body font */
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #fff; /* keep your current white text */
+  background: #121212; /* your dark background */
+}
+
+/* Headings and navbar */
+h1, h2, h3, nav a, .btn, .hero-title {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Sub-headings */
+h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+}
+
+/* Buttons (like View Projects) */
+.btn {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+/* About section */
+#about {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin: 0 auto;
+  text-align: left;
+}
+
+#about h2::after {
+  content: "";
+  display: block;
+  width: 40px;   /* shorter */
+  height: 3px;   /* thicker */
+  margin: 0.5rem auto;
+  background-color: #ff6600; /* your brand orange */
+  border-radius: 2px;
+}
+
+/* Dark mode */
+.theme-dark #about h2 {
+  font-family: 'Poppins', sans-serif; /* modern, bold */
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff; /* crisp white */
+  letter-spacing: 1px;
+}
+
+/* Light mode */
+.theme-light #about h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111111; /* almost black */
+  letter-spacing: 1px;
+}
+
+
 
 /* Subtle overlay for readability */
 #hero::before {

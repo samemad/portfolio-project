@@ -31,8 +31,8 @@ export default function Projects() {
   };
 
   return (
-    <section id="projects" className="projects-section">
-      <h2 className="section-title">Projects</h2>
+    <section  className="projects-section">
+      <h2 className="section-title" id="projects">Projects</h2>
       <div className="projects-scroll-container">
         {projects.map((p) => (
           <div key={p.id} className="project-card">
