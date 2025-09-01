@@ -1,0 +1,7 @@
+url: "https://devsam.icu"
+baseurl: ""
+exclude:
+  - node_modules/
+  - admin/node_modules/
+  - package.json
+  - package-lock.json
