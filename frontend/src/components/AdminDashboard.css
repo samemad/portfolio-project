@@ -1,18 +1,17 @@
-/* AdminDashboard.css */
-
-/* Body & global */
+/* Global Styles */
 body {
   margin: 0;
-  font-family: 'Segoe UI', Roboto, sans-serif;
-  background-color: #121212;
-  color: #fff;
+  font-family: 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+  color: #e0e0e0;
+  line-height: 1.6;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* Main container */
+/* Main Container */
 .admin-container {
   display: flex;
   min-height: 100vh;
@@ -20,44 +19,58 @@ body {
 
 /* Sidebar */
 .sidebar {
-  width: 220px;
-  background-color: #121212;
-  border-right: 2px solid #FF6600;
+  width: 250px;
+  background: #1c1c1c;
+  border-right: 1px solid #ff6f00;
+  padding: 20px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  gap: 20px;
+  gap: 15px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar button {
-  padding: 15px;
+  padding: 12px;
   font-size: 1rem;
-  font-weight: bold;
-  color: #FF6600;
+  font-weight: 600;
+  color: #ff6f00;
   background: transparent;
-  border: 2px solid #FF6600;
-  border-radius: 12px;
+  border: 1px solid #ff6f00;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
+  text-align: left;
 }
 
 .sidebar button:hover {
-  background-color: #FF6600;
-  color: #121212;
-  transform: scale(1.05);
+  background: #ff6f00;
+  color: #1c1c1c;
+  transform: translateX(5px);
 }
 
-/* Page content */
+.sidebar button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.3);
+}
+
+/* Page Content */
 .page-container {
   flex: 1;
-  padding: 40px;
+  padding: 30px;
+  background: #121212;
 }
 
-/* Welcome page */
-.welcome-text {
+/* Welcome Page */
+.welcome-title {
   text-align: center;
-  font-size: 2rem;
-  margin-top: 100px;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ff6f00;
+  margin: 50px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Lists */
@@ -72,135 +85,194 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  background-color: #1c1c1c;
-  border-radius: 12px;
-  border: 2px solid #FF6600;
+  padding: 15px;
+  background: #1e1e1e;
+  border-radius: 10px;
+  border: 1px solid #2a2a2a;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.list-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
 .list-card img {
-  max-width: 80px;
+  max-width: 100px;
   border-radius: 8px;
+  object-fit: cover;
+  margin-right: 15px;
 }
 
-/* Edit & Delete buttons */
+.card-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.card-left span {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Edit & Delete Buttons */
+.card-right {
+  display: flex;
+  gap: 10px;
+}
+
 .edit-btn, .delete-btn {
-  padding: 8px 15px;
-  border-radius: 10px;
-  border: 2px solid;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
   background: transparent;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
   transition: all 0.3s ease;
-  margin-left: 10px;
 }
 
 .edit-btn {
-  border-color: #32CD32;
-  color: #32CD32;
+  background: #32CD32;
+  color: #fff;
 }
 
 .edit-btn:hover {
-  background-color: #32CD32;
-  color: #121212;
+  background: #28a428;
   transform: scale(1.05);
 }
 
 .delete-btn {
-  border-color: #FF6600;
-  color: #FF6600;
+  background: #ff3b3b;
+  color: #fff;
 }
 
 .delete-btn:hover {
-  background-color: #FF6600;
-  color: #121212;
+  background: #e02b2b;
   transform: scale(1.05);
 }
 
 /* Forms */
-.form-container {
+.form-container, .edit-box {
   margin-top: 25px;
   padding: 20px;
-  border: 2px solid #32CD32;
-  border-radius: 12px;
-  max-width: 500px;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  background: #1e1e1e;
+  max-width: 600px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.form-container h3 {
-  color: #FF6600;
+.form-container h3, .edit-box h3 {
+  color: #ff6f00;
   text-align: center;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .form-container input[type="text"],
 .form-container input[type="file"],
-.form-container input[type="number"] {
+.form-container input[type="number"],
+.edit-box input[type="text"],
+.edit-box input[type="file"],
+.edit-box input[type="number"] {
   width: 100%;
   padding: 12px;
-  margin-bottom: 12px;
-  border-radius: 10px;
-  border: none;
-  background-color: #2c2c2c;
-  color: #2c2c2c; /* White text for visibility */
-}
-
-.form-container input::placeholder {
-  color: #ccc;
-}
-/* Form inputs - modern dark style */
-input, textarea {
-  background-color: #1c1c1c;  /* dark input background */
-  color: #fff;                 /* white text */
-  border: 2px solid #FF6600;
-  border-radius: 10px;
-  padding: 12px;
-  width: 100%;
   margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+  background: #2c2c2c;
+  color: #e0e0e0;
   font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-container input:focus,
+.edit-box input:focus {
+  border-color: #ff6f00;
   outline: none;
-  transition: all 0.3s ease;
+  box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.2);
 }
 
-input::placeholder, textarea::placeholder {
-  color: #ccc; /* slightly dim placeholder */
+.form-container input::placeholder,
+.edit-box input::placeholder {
+  color: #888;
 }
 
-input:focus, textarea:focus {
-  border-color: #32CD32;
-  box-shadow: 0 0 8px rgba(50, 205, 50, 0.6);
-}
-
-.form-container button {
-  padding: 12px;
+.form-container button,
+.edit-box button {
+  padding: 10px;
   width: 48%;
-  border-radius: 10px;
-  border: 2px solid #FF6600;
-  background: transparent;
-  color: #FF6600;
-  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  background: #ff6f00;
+  color: #fff;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-right: 4%;
 }
 
-.form-container button:hover {
-  background-color: #FF6600;
-  color: #121212;
+.form-container button:hover,
+.edit-box button:hover {
+  background: #e65c00;
   transform: scale(1.05);
 }
 
-/* Cancel button overrides */
-.form-container button.cancel-btn {
-  border-color: #32CD32;
-  color: #32CD32;
+.form-container button.cancel-btn,
+.edit-box button.cancel-btn {
+  background: #32CD32;
 }
 
-.form-container button.cancel-btn:hover {
-  background-color: #32CD32;
-  color: #121212;
+.form-container button.cancel-btn:hover,
+.edit-box button.cancel-btn:hover {
+  background: #28a428;
 }
 
-/* AddProject & AddCert form container */
-.add-form {
-  margin-bottom: 30px;
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .admin-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #ff6f00;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 15px;
+    position: static;
+  }
+
+  .sidebar button {
+    flex: 1 1 100px;
+    margin: 5px;
+    text-align: center;
+  }
+
+  .page-container {
+    padding: 20px;
+  }
+
+  .list-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .card-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .form-container, .edit-box {
+    max-width: 100%;
+  }
+
+  .welcome-title {
+    font-size: 2rem;
+  }
 }
