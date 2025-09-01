@@ -6,10 +6,17 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 
+// ---------------- CLOUDINARY CONFIG -----------------
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 app.use(cors({
   origin: ["https://devsam.icu", "https://portfolio-project-p04q.onrender.com"],
@@ -18,38 +25,51 @@ app.use(cors({
 
 app.use(express.json());
 
-console.log('ًں”§ Server starting...');
+console.log('🚀 Server starting...');
 console.log('Environment variables loaded:');
 console.log('DATABASE_URL:', process.env.DATABASE_URL);
 console.log('PORT:', process.env.PORT);
-console.log('JWT_SECRET:', process.env.JWT_SECRET); // Verify secret is loaded
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
+console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME);
 
-// ---------------- UPLOADS -----------------
-const uploadsPath = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsPath)) fs.mkdirSync(uploadsPath);
-app.use('/uploads', express.static(uploadsPath)); // Completed the static serving configuration
+// ---------------- MULTER (Updated for memory storage) -----------------
+const storage = multer.memoryStorage(); // Changed from diskStorage to memoryStorage
+const upload = multer({ storage });
 
 // ---------------- POSTGRESQL -----------------
-console.log('ًں”„ Connecting to PostgreSQL...');
+console.log('🔌 Connecting to PostgreSQL...');
 const db = new Client({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
 db.connect()
-  .then(() => console.log('âœ… PostgreSQL Connected successfully'))
+  .then(() => console.log('✅ PostgreSQL Connected successfully'))
   .catch(err => {
-    console.error('â‌Œ PostgreSQL connection error:', err);
+    console.error('❌ PostgreSQL connection error:', err);
     console.error('Make sure PostgreSQL is running and database exists!');
     process.exit(1);
   });
 
-// ---------------- MULTER -----------------
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsPath),
-  filename: (req, file, cb) => cb(null, `${Date.now()}${path.extname(file.originalname)}`)
-});
-const upload = multer({ storage });
+// ---------------- HELPER FUNCTION FOR CLOUDINARY UPLOAD -----------------
+const uploadToCloudinary = (buffer, folder = 'portfolio') => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream(
+      {
+        resource_type: 'auto',
+        folder: folder,
+        transformation: [
+          { width: 800, height: 600, crop: 'limit' },
+          { quality: 'auto', fetch_format: 'auto' }
+        ]
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    ).end(buffer);
+  });
+};
 
 // ---------------- AUTH -----------------
 app.post('/api/login', async (req, res) => {
@@ -103,7 +123,18 @@ app.get('/api/projects', async (req, res) => {
 app.post('/api/projects', verifyToken, upload.single('image'), async (req, res) => {
   console.log('Adding project, body:', req.body, 'file:', req.file);
   const { title, description, link } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : '';
+  
+  let image = '';
+  if (req.file) {
+    try {
+      image = await uploadToCloudinary(req.file.buffer, 'projects');
+      console.log('Image uploaded to Cloudinary:', image);
+    } catch (error) {
+      console.error('Cloudinary upload error:', error);
+      return res.status(500).json({ message: 'Image upload failed', error: error.message });
+    }
+  }
+  
   try {
     const result = await db.query(
       'INSERT INTO projects (title, description, image, link) VALUES ($1, $2, $3, $4) RETURNING id',
@@ -118,23 +149,28 @@ app.post('/api/projects', verifyToken, upload.single('image'), async (req, res) 
 app.put('/api/projects/:id', verifyToken, upload.single('image'), async (req, res) => {
   console.log('Updating project with ID:', req.params.id, 'body:', req.body, 'file:', req.file);
   const { title, description, link } = req.body;
-  const newImage = req.file ? `/uploads/${req.file.filename}` : undefined;
+  
   try {
     const result = await db.query('SELECT image FROM projects WHERE id = $1', [req.params.id]);
-    const oldImage = result.rows[0]?.image;
-    const updateFields = [title || null, description || null, newImage || oldImage || null, link || null, req.params.id];
+    let newImage = result.rows[0]?.image; // Keep old image by default
+    
+    if (req.file) {
+      try {
+        newImage = await uploadToCloudinary(req.file.buffer, 'projects');
+        console.log('New image uploaded to Cloudinary:', newImage);
+      } catch (error) {
+        console.error('Cloudinary upload error:', error);
+        return res.status(500).json({ message: 'Image upload failed', error: error.message });
+      }
+    }
+    
+    const updateFields = [title || null, description || null, newImage || null, link || null, req.params.id];
     
     await db.query(
       'UPDATE projects SET title = $1, description = $2, image = $3, link = $4 WHERE id = $5',
       updateFields
     );
     
-    if (newImage && oldImage && fs.existsSync(path.join(__dirname, 'uploads', path.basename(oldImage)))) {
-      fs.unlink(path.join(__dirname, 'uploads', path.basename(oldImage)), (err) => {
-        if (err) console.error('Failed to delete old image:', err);
-        else console.log('Old image deleted:', oldImage);
-      });
-    }
     res.json({ message: 'Project updated' });
   } catch (err) {
     return res.status(500).json({ message: 'Database error', error: err.message });
@@ -144,16 +180,6 @@ app.put('/api/projects/:id', verifyToken, upload.single('image'), async (req, re
 app.delete('/api/projects/:id', verifyToken, async (req, res) => {
   console.log('Deleting project with ID:', req.params.id);
   try {
-    const result = await db.query('SELECT image FROM projects WHERE id = $1', [req.params.id]);
-    if (result.rows.length && result.rows[0].image) {
-      const imagePath = path.join(__dirname, 'uploads', path.basename(result.rows[0].image));
-      if (fs.existsSync(imagePath)) {
-        fs.unlink(imagePath, (err) => {
-          if (err) console.error('Failed to delete image:', err);
-          else console.log('Image deleted:', imagePath);
-        });
-      }
-    }
     await db.query('DELETE FROM projects WHERE id = $1', [req.params.id]);
     res.json({ message: 'Project deleted' });
   } catch (err) {
@@ -175,7 +201,18 @@ app.get('/api/certifications', async (req, res) => {
 app.post('/api/certifications', verifyToken, upload.single('image'), async (req, res) => {
   console.log('Adding certification, body:', req.body, 'file:', req.file);
   const { name, provider, year } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : '';
+  
+  let image = '';
+  if (req.file) {
+    try {
+      image = await uploadToCloudinary(req.file.buffer, 'certifications');
+      console.log('Image uploaded to Cloudinary:', image);
+    } catch (error) {
+      console.error('Cloudinary upload error:', error);
+      return res.status(500).json({ message: 'Image upload failed', error: error.message });
+    }
+  }
+  
   try {
     const result = await db.query(
       'INSERT INTO certifications (name, provider, year, image) VALUES ($1, $2, $3, $4) RETURNING id',
@@ -190,23 +227,28 @@ app.post('/api/certifications', verifyToken, upload.single('image'), async (req,
 app.put('/api/certifications/:id', verifyToken, upload.single('image'), async (req, res) => {
   console.log('Updating certification with ID:', req.params.id, 'body:', req.body, 'file:', req.file);
   const { name, provider, year } = req.body;
-  const newImage = req.file ? `/uploads/${req.file.filename}` : undefined;
+  
   try {
     const result = await db.query('SELECT image FROM certifications WHERE id = $1', [req.params.id]);
-    const oldImage = result.rows[0]?.image;
-    const updateFields = [name || null, provider || null, year || null, newImage || oldImage || null, req.params.id];
+    let newImage = result.rows[0]?.image; // Keep old image by default
+    
+    if (req.file) {
+      try {
+        newImage = await uploadToCloudinary(req.file.buffer, 'certifications');
+        console.log('New image uploaded to Cloudinary:', newImage);
+      } catch (error) {
+        console.error('Cloudinary upload error:', error);
+        return res.status(500).json({ message: 'Image upload failed', error: error.message });
+      }
+    }
+    
+    const updateFields = [name || null, provider || null, year || null, newImage || null, req.params.id];
     
     await db.query(
       'UPDATE certifications SET name = $1, provider = $2, year = $3, image = $4 WHERE id = $5',
       updateFields
     );
     
-    if (newImage && oldImage && fs.existsSync(path.join(__dirname, 'uploads', path.basename(oldImage)))) {
-      fs.unlink(path.join(__dirname, 'uploads', path.basename(oldImage)), (err) => {
-        if (err) console.error('Failed to delete old image:', err);
-        else console.log('Old image deleted:', oldImage);
-      });
-    }
     res.json({ message: 'Certification updated' });
   } catch (err) {
     return res.status(500).json({ message: 'Database error', error: err.message });
@@ -216,16 +258,6 @@ app.put('/api/certifications/:id', verifyToken, upload.single('image'), async (r
 app.delete('/api/certifications/:id', verifyToken, async (req, res) => {
   console.log('Deleting certification with ID:', req.params.id);
   try {
-    const result = await db.query('SELECT image FROM certifications WHERE id = $1', [req.params.id]);
-    if (result.rows.length && result.rows[0].image) {
-      const imagePath = path.join(__dirname, 'uploads', path.basename(result.rows[0].image));
-      if (fs.existsSync(imagePath)) {
-        fs.unlink(imagePath, (err) => {
-          if (err) console.error('Failed to delete image:', err);
-          else console.log('Image deleted:', imagePath);
-        });
-      }
-    }
     await db.query('DELETE FROM certifications WHERE id = $1', [req.params.id]);
     res.json({ message: 'Certification deleted' });
   } catch (err) {
@@ -236,32 +268,27 @@ app.delete('/api/certifications/:id', verifyToken, async (req, res) => {
 // ---------------- SERVE FRONTEND & ADMIN -----------------
 const frontendBuildPath = path.join(__dirname, '../frontend/build');
 
-
-console.log('ًں“پ Build paths:');
+console.log('📁 Build paths:');
 console.log('Frontend build path:', frontendBuildPath);
-
 console.log('Frontend build exists:', fs.existsSync(frontendBuildPath));
 
-
 if (fs.existsSync(frontendBuildPath)) {
-  console.log('âœ… Serving frontend static files');
+  console.log('✅ Serving frontend static files');
   app.use(express.static(frontendBuildPath));
 } else {
-  console.log('â‌Œ Frontend build folder not found!');
+  console.log('❌ Frontend build folder not found!');
 }
-
-
 
 app.get('*', (req, res) => {
   const indexFile = path.join(frontendBuildPath, 'index.html');
-  console.log('ًں“„ Serving frontend index.html for route:', req.path);
+  console.log('🌐 Serving frontend index.html for route:', req.path);
   return fs.existsSync(indexFile) ? res.sendFile(indexFile) : res.status(404).send('Frontend not found');
 });
 
 // ---------------- START SERVER -----------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`ًںڑ€ Server running on port ${PORT}`);
-  console.log(`ًںŒگ Frontend: http://localhost:${PORT}/`);
-  console.log(`ًں”§ Admin: http://localhost:${PORT}/admin/`);
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌍 Frontend: http://localhost:${PORT}/`);
+  console.log(`⚡ Admin: http://localhost:${PORT}/admin/`);
 });
