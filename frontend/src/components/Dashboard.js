@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import '../AdminDashboard.css'; // Combined new CSS
+import './AdminDashboard.css';
+
 import {
   getProjects,
   getCertifications,
