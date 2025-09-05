@@ -58,21 +58,35 @@
   line-height: 1.5;
 }
 
-/* ✅ Button styled with hero gradient */
+/* ---------------------- */
+/* Project Button (auto light/dark) */
+/* ---------------------- */
+:root {
+  --project-btn-bg: linear-gradient(90deg, #ff6600, #ff9900);
+  --project-btn-text: #fff;
+  --project-btn-hover: brightness(1.1);
+}
+
+.dark {
+  --project-btn-bg: linear-gradient(90deg, #ffd54f, #ffc107);
+  --project-btn-text: #000;
+  --project-btn-hover: brightness(1.2);
+}
+
 .project-link {
   display: inline-block;
   margin-top: 15px;
   padding: 12px 25px;
-  background: var(--hero-gradient);    /* use gradient */
-  color: var(--accent-contrast);
+  background: var(--project-btn-bg);
+  color: var(--project-btn-text);
   border-radius: 12px;
   text-decoration: none;
   font-weight: bold;
-  transition: opacity 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .project-link:hover {
-  opacity: 0.9;
+  filter: var(--project-btn-hover);
   transform: translateY(-2px);
 }
 
@@ -97,4 +111,7 @@
   .project-image {
     height: 200px;
   }
+}
+.dark .project-link {
+  box-shadow: 0 0 12px rgba(255, 193, 7, 0.6);
 }
