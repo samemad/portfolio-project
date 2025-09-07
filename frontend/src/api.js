@@ -1,76 +1,125 @@
+// api.js - Optimized version with timeouts and better error handling
 const API_BASE = 'https://portfolio-project-p04q.onrender.com/api';
 
+// Add timeout wrapper for all requests
+const fetchWithTimeout = async (url, options = {}, timeout = 30000) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out');
+    }
+    throw error;
+  }
+};
+
 export const getProjects = async () => {
-  const res = await fetch(`${API_BASE}/projects`);
+  const res = await fetchWithTimeout(`${API_BASE}/projects`);
+  if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
   return res.json();
 };
 
-export const addProject = async (formData, token) => {
-  const res = await fetch(`${API_BASE}/projects`, {
+export const addProject = async (formData, token, onProgress) => {
+  // Optional progress callback for UI updates
+  if (onProgress) onProgress({ status: 'uploading', message: 'Uploading image...' });
+  
+  const res = await fetchWithTimeout(`${API_BASE}/projects`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
-    body: formData, // use directly
-  });
+    body: formData,
+  }, 45000); // Longer timeout for file uploads
+  
+  if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+  
+  if (onProgress) onProgress({ status: 'success', message: 'Upload complete!' });
   return res.json();
 };
 
-
-export const updateProject = async (id, formData, token) => {
-  const res = await fetch(`${API_BASE}/projects/${id}`, {
+export const updateProject = async (id, formData, token, onProgress) => {
+  if (onProgress) onProgress({ status: 'uploading', message: 'Updating project...' });
+  
+  const res = await fetchWithTimeout(`${API_BASE}/projects/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: formData,
-  });
+  }, 45000);
+  
+  if (!res.ok) throw new Error(`Update failed: ${res.status}`);
+  
+  if (onProgress) onProgress({ status: 'success', message: 'Update complete!' });
   return res.json();
 };
 
 export const deleteProject = async (id, token) => {
-  const res = await fetch(`${API_BASE}/projects/${id}`, {
+  const res = await fetchWithTimeout(`${API_BASE}/projects/${id}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   });
+  if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
   return res.json();
 };
 
 export const getCertifications = async () => {
-  const res = await fetch(`${API_BASE}/certifications`);
+  const res = await fetchWithTimeout(`${API_BASE}/certifications`);
+  if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
   return res.json();
 };
 
-// api.js
-export const addCertification = async (formData, token) => {
-  const res = await fetch(`${API_BASE}/certifications`, {
+export const addCertification = async (formData, token, onProgress) => {
+  if (onProgress) onProgress({ status: 'uploading', message: 'Uploading certification...' });
+  
+  const res = await fetchWithTimeout(`${API_BASE}/certifications`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${token}` }, // do NOT set Content-Type, browser sets it automatically
-    body: formData, // send FormData directly
-  });
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  }, 45000);
+  
+  if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+  
+  if (onProgress) onProgress({ status: 'success', message: 'Upload complete!' });
   return res.json();
 };
 
-
-export const updateCertification = async (id, formData, token) => {
-  const res = await fetch(`${API_BASE}/certifications/${id}`, {
+export const updateCertification = async (id, formData, token, onProgress) => {
+  if (onProgress) onProgress({ status: 'uploading', message: 'Updating certification...' });
+  
+  const res = await fetchWithTimeout(`${API_BASE}/certifications/${id}`, {
     method: "PUT",
     headers: { Authorization: `Bearer ${token}` },
     body: formData,
-  });
+  }, 45000);
+  
+  if (!res.ok) throw new Error(`Update failed: ${res.status}`);
+  
+  if (onProgress) onProgress({ status: 'success', message: 'Update complete!' });
   return res.json();
 };
 
 export const deleteCertification = async (id, token) => {
-  const res = await fetch(`${API_BASE}/certifications/${id}`, {
+  const res = await fetchWithTimeout(`${API_BASE}/certifications/${id}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   });
+  if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
   return res.json();
 };
 
 export const login = async (username, password) => {
-  const res = await fetch(`${API_BASE}/login`, {
+  const res = await fetchWithTimeout(`${API_BASE}/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
   });
+  if (!res.ok) throw new Error(`Login failed: ${res.status}`);
   return res.json();
 };
 
@@ -79,13 +128,10 @@ export const BACKEND_URL = API_BASE.replace(/\/api\/?$/, "");
 
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return null;
-  // If imagePath already includes the full URL, return as is
   if (imagePath.startsWith('http')) return imagePath;
-  // Otherwise, prepend the backend URL
   return `${BACKEND_URL}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
 };
 
-// Default export for components that import API as default
 const API = {
   getProjects,
   addProject,

@@ -25,6 +25,16 @@ app.use(cors({
 
 app.use(express.json());
 
+// ---------------- REQUEST LOGGING MIDDLEWARE -----------------
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
+  });
+  next();
+});
+
 console.log('🚀 Server starting...');
 console.log('Environment variables loaded:');
 console.log('DATABASE_URL:', process.env.DATABASE_URL);
@@ -33,8 +43,20 @@ console.log('JWT_SECRET:', process.env.JWT_SECRET);
 console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME);
 
 // ---------------- MULTER (Updated for memory storage) -----------------
-const storage = multer.memoryStorage(); // Changed from diskStorage to memoryStorage
-const upload = multer({ storage });
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
 
 // ---------------- POSTGRESQL -----------------
 console.log('🔌 Connecting to PostgreSQL...');
@@ -51,25 +73,50 @@ db.connect()
     process.exit(1);
   });
 
-// ---------------- HELPER FUNCTION FOR CLOUDINARY UPLOAD -----------------
+// ---------------- OPTIMIZED CLOUDINARY UPLOAD -----------------
 const uploadToCloudinary = (buffer, folder = 'portfolio') => {
   return new Promise((resolve, reject) => {
+    // Set a timeout for Cloudinary uploads
+    const uploadTimeout = setTimeout(() => {
+      reject(new Error('Cloudinary upload timeout'));
+    }, 30000); // 30 second timeout
+
     cloudinary.uploader.upload_stream(
       {
         resource_type: 'auto',
         folder: folder,
+        // Optimized transformations - less processing = faster upload
         transformation: [
-          { width: 800, height: 600, crop: 'limit' },
-          { quality: 'auto', fetch_format: 'auto' }
-        ]
+          { width: 800, height: 600, crop: 'limit', quality: 'auto:good' },
+          { fetch_format: 'auto' }
+        ],
+        // Add these optimizations
+        eager_async: true, // Process transformations in background
+        invalidate: true,   // Cache busting
+        overwrite: true     // Overwrite existing files
       },
       (error, result) => {
-        if (error) reject(error);
-        else resolve(result.secure_url);
+        clearTimeout(uploadTimeout);
+        if (error) {
+          console.error('Cloudinary upload error:', error);
+          reject(error);
+        } else {
+          console.log('Cloudinary upload success:', result.secure_url);
+          resolve(result.secure_url);
+        }
       }
     ).end(buffer);
   });
 };
+
+// ---------------- HEALTH CHECK ENDPOINT -----------------
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
 
 // ---------------- AUTH -----------------
 app.post('/api/login', async (req, res) => {
@@ -113,7 +160,7 @@ const verifyToken = (req, res, next) => {
 app.get('/api/projects', async (req, res) => {
   console.log('Fetching all projects');
   try {
-    const result = await db.query('SELECT * FROM projects');
+    const result = await db.query('SELECT * FROM projects ORDER BY id DESC');
     res.json(result.rows);
   } catch (err) {
     return res.status(500).json({ message: 'Database error', error: err.message });
@@ -121,67 +168,125 @@ app.get('/api/projects', async (req, res) => {
 });
 
 app.post('/api/projects', verifyToken, upload.single('image'), async (req, res) => {
-  console.log('Adding project, body:', req.body, 'file:', req.file);
+  console.log('Adding project, body:', req.body);
   const { title, description, link } = req.body;
   
   let image = '';
+  
+  // Check if image exists and validate
   if (req.file) {
+    console.log('File received:', {
+      originalName: req.file.originalname,
+      size: req.file.size,
+      mimetype: req.file.mimetype
+    });
+    
     try {
+      console.log('Starting Cloudinary upload...');
+      const startTime = Date.now();
       image = await uploadToCloudinary(req.file.buffer, 'projects');
-      console.log('Image uploaded to Cloudinary:', image);
+      const uploadTime = Date.now() - startTime;
+      console.log(`Cloudinary upload completed in ${uploadTime}ms`);
     } catch (error) {
       console.error('Cloudinary upload error:', error);
-      return res.status(500).json({ message: 'Image upload failed', error: error.message });
+      return res.status(500).json({ 
+        message: 'Image upload failed', 
+        error: error.message || 'Unknown upload error' 
+      });
     }
   }
   
   try {
+    console.log('Saving to database...');
+    const dbStart = Date.now();
     const result = await db.query(
-      'INSERT INTO projects (title, description, image, link) VALUES ($1, $2, $3, $4) RETURNING id',
+      'INSERT INTO projects (title, description, image, link) VALUES ($1, $2, $3, $4) RETURNING *',
       [title, description, image, link]
     );
-    res.json({ message: 'Project added', id: result.rows[0].id });
+    const dbTime = Date.now() - dbStart;
+    console.log(`Database save completed in ${dbTime}ms`);
+    
+    res.status(201).json({ 
+      message: 'Project added successfully', 
+      project: result.rows[0] 
+    });
   } catch (err) {
-    return res.status(500).json({ message: 'Database error', error: err.message });
+    console.error('Database error:', err);
+    return res.status(500).json({ 
+      message: 'Database error', 
+      error: err.message 
+    });
   }
 });
 
 app.put('/api/projects/:id', verifyToken, upload.single('image'), async (req, res) => {
-  console.log('Updating project with ID:', req.params.id, 'body:', req.body, 'file:', req.file);
+  console.log('Updating project with ID:', req.params.id);
   const { title, description, link } = req.body;
   
   try {
-    const result = await db.query('SELECT image FROM projects WHERE id = $1', [req.params.id]);
-    let newImage = result.rows[0]?.image; // Keep old image by default
+    // Get current project
+    const currentProject = await db.query('SELECT * FROM projects WHERE id = $1', [req.params.id]);
+    if (!currentProject.rows.length) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+    
+    let newImage = currentProject.rows[0].image; // Keep existing image by default
     
     if (req.file) {
+      console.log('New file received for update:', {
+        originalName: req.file.originalname,
+        size: req.file.size,
+        mimetype: req.file.mimetype
+      });
+      
       try {
+        console.log('Uploading new image...');
+        const startTime = Date.now();
         newImage = await uploadToCloudinary(req.file.buffer, 'projects');
-        console.log('New image uploaded to Cloudinary:', newImage);
+        const uploadTime = Date.now() - startTime;
+        console.log(`New image uploaded in ${uploadTime}ms`);
       } catch (error) {
         console.error('Cloudinary upload error:', error);
-        return res.status(500).json({ message: 'Image upload failed', error: error.message });
+        return res.status(500).json({ 
+          message: 'Image upload failed', 
+          error: error.message 
+        });
       }
     }
     
-    const updateFields = [title || null, description || null, newImage || null, link || null, req.params.id];
-    
-    await db.query(
-      'UPDATE projects SET title = $1, description = $2, image = $3, link = $4 WHERE id = $5',
-      updateFields
+    // Update with new values or keep existing ones
+    const updatedProject = await db.query(
+      `UPDATE projects 
+       SET title = COALESCE($1, title), 
+           description = COALESCE($2, description), 
+           image = $3, 
+           link = COALESCE($4, link)
+       WHERE id = $5 
+       RETURNING *`,
+      [title || null, description || null, newImage, link || null, req.params.id]
     );
     
-    res.json({ message: 'Project updated' });
+    res.json({ 
+      message: 'Project updated successfully', 
+      project: updatedProject.rows[0] 
+    });
   } catch (err) {
-    return res.status(500).json({ message: 'Database error', error: err.message });
+    console.error('Update error:', err);
+    return res.status(500).json({ 
+      message: 'Database error', 
+      error: err.message 
+    });
   }
 });
 
 app.delete('/api/projects/:id', verifyToken, async (req, res) => {
   console.log('Deleting project with ID:', req.params.id);
   try {
-    await db.query('DELETE FROM projects WHERE id = $1', [req.params.id]);
-    res.json({ message: 'Project deleted' });
+    const result = await db.query('DELETE FROM projects WHERE id = $1 RETURNING *', [req.params.id]);
+    if (!result.rows.length) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+    res.json({ message: 'Project deleted successfully' });
   } catch (err) {
     return res.status(500).json({ message: 'Database error', error: err.message });
   }
@@ -191,7 +296,7 @@ app.delete('/api/projects/:id', verifyToken, async (req, res) => {
 app.get('/api/certifications', async (req, res) => {
   console.log('Fetching all certifications');
   try {
-    const result = await db.query('SELECT * FROM certifications');
+    const result = await db.query('SELECT * FROM certifications ORDER BY year DESC, id DESC');
     res.json(result.rows);
   } catch (err) {
     return res.status(500).json({ message: 'Database error', error: err.message });
@@ -199,70 +304,142 @@ app.get('/api/certifications', async (req, res) => {
 });
 
 app.post('/api/certifications', verifyToken, upload.single('image'), async (req, res) => {
-  console.log('Adding certification, body:', req.body, 'file:', req.file);
+  console.log('Adding certification, body:', req.body);
   const { name, provider, year } = req.body;
   
   let image = '';
   if (req.file) {
+    console.log('File received:', {
+      originalName: req.file.originalname,
+      size: req.file.size,
+      mimetype: req.file.mimetype
+    });
+    
     try {
+      console.log('Starting Cloudinary upload...');
+      const startTime = Date.now();
       image = await uploadToCloudinary(req.file.buffer, 'certifications');
-      console.log('Image uploaded to Cloudinary:', image);
+      const uploadTime = Date.now() - startTime;
+      console.log(`Cloudinary upload completed in ${uploadTime}ms`);
     } catch (error) {
       console.error('Cloudinary upload error:', error);
-      return res.status(500).json({ message: 'Image upload failed', error: error.message });
+      return res.status(500).json({ 
+        message: 'Image upload failed', 
+        error: error.message 
+      });
     }
   }
   
   try {
+    console.log('Saving to database...');
     const result = await db.query(
-      'INSERT INTO certifications (name, provider, year, image) VALUES ($1, $2, $3, $4) RETURNING id',
+      'INSERT INTO certifications (name, provider, year, image) VALUES ($1, $2, $3, $4) RETURNING *',
       [name, provider, year, image]
     );
-    res.json({ message: 'Certification added', id: result.rows[0].id });
+    res.status(201).json({ 
+      message: 'Certification added successfully', 
+      certification: result.rows[0] 
+    });
   } catch (err) {
-    return res.status(500).json({ message: 'Database error', error: err.message });
+    console.error('Database error:', err);
+    return res.status(500).json({ 
+      message: 'Database error', 
+      error: err.message 
+    });
   }
 });
 
 app.put('/api/certifications/:id', verifyToken, upload.single('image'), async (req, res) => {
-  console.log('Updating certification with ID:', req.params.id, 'body:', req.body, 'file:', req.file);
+  console.log('Updating certification with ID:', req.params.id);
   const { name, provider, year } = req.body;
   
   try {
-    const result = await db.query('SELECT image FROM certifications WHERE id = $1', [req.params.id]);
-    let newImage = result.rows[0]?.image; // Keep old image by default
+    // Get current certification
+    const currentCert = await db.query('SELECT * FROM certifications WHERE id = $1', [req.params.id]);
+    if (!currentCert.rows.length) {
+      return res.status(404).json({ message: 'Certification not found' });
+    }
+    
+    let newImage = currentCert.rows[0].image; // Keep existing image by default
     
     if (req.file) {
+      console.log('New file received for update:', {
+        originalName: req.file.originalname,
+        size: req.file.size,
+        mimetype: req.file.mimetype
+      });
+      
       try {
+        console.log('Uploading new image...');
+        const startTime = Date.now();
         newImage = await uploadToCloudinary(req.file.buffer, 'certifications');
-        console.log('New image uploaded to Cloudinary:', newImage);
+        const uploadTime = Date.now() - startTime;
+        console.log(`New image uploaded in ${uploadTime}ms`);
       } catch (error) {
         console.error('Cloudinary upload error:', error);
-        return res.status(500).json({ message: 'Image upload failed', error: error.message });
+        return res.status(500).json({ 
+          message: 'Image upload failed', 
+          error: error.message 
+        });
       }
     }
     
-    const updateFields = [name || null, provider || null, year || null, newImage || null, req.params.id];
-    
-    await db.query(
-      'UPDATE certifications SET name = $1, provider = $2, year = $3, image = $4 WHERE id = $5',
-      updateFields
+    // Update with new values or keep existing ones
+    const updatedCert = await db.query(
+      `UPDATE certifications 
+       SET name = COALESCE($1, name), 
+           provider = COALESCE($2, provider), 
+           year = COALESCE($3, year), 
+           image = $4
+       WHERE id = $5 
+       RETURNING *`,
+      [name || null, provider || null, year || null, newImage, req.params.id]
     );
     
-    res.json({ message: 'Certification updated' });
+    res.json({ 
+      message: 'Certification updated successfully', 
+      certification: updatedCert.rows[0] 
+    });
   } catch (err) {
-    return res.status(500).json({ message: 'Database error', error: err.message });
+    console.error('Update error:', err);
+    return res.status(500).json({ 
+      message: 'Database error', 
+      error: err.message 
+    });
   }
 });
 
 app.delete('/api/certifications/:id', verifyToken, async (req, res) => {
   console.log('Deleting certification with ID:', req.params.id);
   try {
-    await db.query('DELETE FROM certifications WHERE id = $1', [req.params.id]);
-    res.json({ message: 'Certification deleted' });
+    const result = await db.query('DELETE FROM certifications WHERE id = $1 RETURNING *', [req.params.id]);
+    if (!result.rows.length) {
+      return res.status(404).json({ message: 'Certification not found' });
+    }
+    res.json({ message: 'Certification deleted successfully' });
   } catch (err) {
     return res.status(500).json({ message: 'Database error', error: err.message });
   }
+});
+
+// ---------------- ERROR HANDLING MIDDLEWARE -----------------
+app.use((error, req, res, next) => {
+  console.error('Global error handler:', error);
+  
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ message: 'File too large! Max 5MB allowed.' });
+    }
+  }
+  
+  if (error.message === 'Only image files are allowed!') {
+    return res.status(400).json({ message: error.message });
+  }
+  
+  res.status(500).json({ 
+    message: 'Internal server error', 
+    error: error.message 
+  });
 });
 
 // ---------------- SERVE FRONTEND & ADMIN -----------------
@@ -291,4 +468,5 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🌍 Frontend: http://localhost:${PORT}/`);
   console.log(`⚡ Admin: http://localhost:${PORT}/admin/`);
+  console.log(`🏥 Health Check: http://localhost:${PORT}/api/health`);
 });
