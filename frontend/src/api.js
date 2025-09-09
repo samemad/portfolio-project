@@ -1,4 +1,5 @@
 // api.js - Optimized version with timeouts and better error handling
+
 const API_BASE = 'https://portfolio-project-p04q.onrender.com/api';
 
 // Add timeout wrapper for all requests
