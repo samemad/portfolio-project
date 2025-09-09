@@ -1,6 +1,7 @@
-// src/components/Hero.js
+// src/components/Hero.js - Updated with TextType
 import React from 'react';
 import { HashLink } from 'react-router-hash-link';
+import TextType from './TextType'; // Import your TextType component
 import heroImage from '../assets/images/hero.JPG';
 
 function Hero() {
@@ -11,18 +12,37 @@ function Hero() {
         <h1 className="text-5xl font-bold leading-tight">
           Hi, I'm <span className="text-white">Sam Emad</span>
         </h1>
-        <p className="text-xl max-w-lg">
-          Turning ideas into clean, modern, and scalable apps.
-        </p>
+        
+        {/* Animated typing text */}
+        <div className="text-xl max-w-lg min-h-[60px]"> {/* Fixed height to prevent layout shift */}
+          <TextType 
+            text={[
+              "Turning ideas into clean apps", 
+              "Building modern web solutions", 
+              "Creating scalable full-stack apps"
+            ]}
+            typingSpeed={75}
+            pauseDuration={1500}
+            deletingSpeed={50}
+            showCursor={true}
+            cursorCharacter="|"
+            cursorClassName="text-white opacity-80"
+            textColors={['#ffffff', '#f0f0f0', '#e0e0e0']} // Subtle color variations
+            className="text-xl"
+            loop={true}
+            initialDelay={500} // Start typing after 500ms
+          />
+        </div>
+        
         {/* Buttons */}
         <div className="flex space-x-4">     
-            <HashLink 
-              smooth 
-              to="#projects"
-              className="px-6 py-3 bg-white text-purple-600 font-semibold rounded-lg hover:bg-gray-200 transition"
-            >
-              View Projects
-            </HashLink>
+          <HashLink 
+            smooth 
+            to="#projects"
+            className="px-6 py-3 bg-white text-purple-600 font-semibold rounded-lg hover:bg-gray-200 transition"
+          >
+            View Projects
+          </HashLink>
           <a
             href="/cv.pdf"
             download="MyCV.pdf"
