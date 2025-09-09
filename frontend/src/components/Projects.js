@@ -88,7 +88,9 @@ export default function Projects() {
   if (error) {
     return (
       <section className="projects-section">
-        <h2 className="section-title" id="projects">Projects</h2>
+        <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+          Projects
+        </ThemedGradientText>
         <div style={{ 
           textAlign: 'center', 
           padding: '2rem',
@@ -119,7 +121,9 @@ export default function Projects() {
 
   return (
     <section className="projects-section">
-      <h2 className="section-title" id="projects">Projects</h2>
+      <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+          Projects
+        </ThemedGradientText>
       <div className="projects-scroll-container">
         {projects.map((p) => (
           <div key={p.id} className="project-card">

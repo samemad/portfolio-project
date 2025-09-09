@@ -87,7 +87,9 @@ export default function Certifications() {
   if (error) {
     return (
       <section className="certs-section">
-        <h2 className="section-title">Certifications</h2>
+       <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+        Certifications  
+      </ThemedGradientText>
         <div style={{ 
           textAlign: 'center', 
           padding: '2rem',
@@ -118,7 +120,9 @@ export default function Certifications() {
 
   return (
     <section className="certs-section">
-      <h2 className="section-title">Certifications</h2>
+     <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+        Certifications  
+      </ThemedGradientText>
       <div className="certs-scroll-container">
         {certs.map((c) => (
           <div key={c.id} className="cert-card">
