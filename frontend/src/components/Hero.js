@@ -14,7 +14,7 @@ function Hero() {
         </h1>
         
         {/* Animated typing text */}
-        <div className="text-3xl max-w-lg min-h-[60px]"> {/* Fixed height to prevent layout shift */}
+        <div className="text-xl max-w-lg min-h-[60px]"> {/* Fixed height to prevent layout shift */}
           <TextType 
             text={[
               "Turning ideas into clean apps", 
