@@ -33,8 +33,10 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: npm install --ignore-engines
-        
+        run: |
+          npm cache clean --force
+          npm install --force --ignore-engines
+
       - name: Build React app
         working-directory: ./frontend
         env:
