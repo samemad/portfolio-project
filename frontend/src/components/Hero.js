@@ -6,9 +6,7 @@ import heroImage from '../assets/images/hero.JPG';
 import SplitText from './SplitText';
 
 function Hero() {
-  const handleAnimationComplete = () => {
-  console.log('All letters have animated!');
-};
+
   return (
     <section id="hero" className="flex flex-col md:flex-row items-center md:items-center justify-between px-6 pt-20 md:pt-28 pb-20 bg-gradient-to-r from-purple-500 to-indigo-600 text-white min-h-screen">
       {/* Left Side - Text */}
