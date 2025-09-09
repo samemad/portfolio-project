@@ -27,7 +27,7 @@ function Hero() {
                   onLetterAnimationComplete={() => console.log('Name animated!')}
                />
         {/* Animated typing text */}
-        <div className="text-4xl max-w-lg min-h-[60px]"> {/* Fixed height to prevent layout shift */}
+        <div className="text-3xl max-w-lg min-h-[60px]"> {/* Fixed height to prevent layout shift */}
           <TextType 
             text={[
               "Turning ideas into clean apps", 
@@ -41,7 +41,7 @@ function Hero() {
             cursorCharacter="|"
             cursorClassName="text-white opacity-80"
             textColors={['#ffffff', '#f0f0f0', '#e0e0e0']} // Subtle color variations
-            className="text-4xl"
+            className="text-3xl"
             loop={true}
             initialDelay={500} // Start typing after 500ms
           />
