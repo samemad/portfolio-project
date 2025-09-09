@@ -3,16 +3,31 @@ import React from 'react';
 import { HashLink } from 'react-router-hash-link';
 import TextType from './TextType'; // Import your TextType component
 import heroImage from '../assets/images/hero.JPG';
+import SplitText from './SplitText';
 
 function Hero() {
+  const handleAnimationComplete = () => {
+  console.log('All letters have animated!');
+};
   return (
     <section id="hero" className="flex flex-col md:flex-row items-center md:items-center justify-between px-6 pt-20 md:pt-28 pb-20 bg-gradient-to-r from-purple-500 to-indigo-600 text-white min-h-screen">
       {/* Left Side - Text */}
+      
       <div className="md:w-1/2 flex flex-col justify-center space-y-6 md:space-y-8">
-        <h1 className="text-5xl font-bold leading-tight">
-          Hi, I'm <span className="text-white">Sam Emad</span>
-        </h1>
-        
+              <SplitText
+                  text="Hi, I'm Sam Emad"
+                  className="text-5xl font-bold leading-tight"
+                  delay={100}
+                  duration={0.6}
+                  ease="power3.out"
+                  splitType="chars"
+                  from={{ opacity: 0, y: 40 }}
+                  to={{ opacity: 1, y: 0 }}
+                  threshold={0.1}
+                  rootMargin="-100px"
+                  textAlign="left"  // Changed from "center" since your text is left-aligned
+                  onLetterAnimationComplete={() => console.log('Name animated!')}
+               />
         {/* Animated typing text */}
         <div className="text-4xl max-w-lg min-h-[60px]"> {/* Fixed height to prevent layout shift */}
           <TextType 
