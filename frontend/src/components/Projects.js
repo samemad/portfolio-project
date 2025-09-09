@@ -1,6 +1,6 @@
-// Projects.js - Updated with react-spinners
+// Projects.js - Updated with loading state
 import React, { useEffect, useState } from "react";
-import { PulseLoader } from 'react-spinners'; // Changed from react-bits
+import { Pulse } from 'react-bits'; // Add this import
 import API, { BACKEND_URL } from "../api";
 import "./Projects.css";
 
@@ -48,7 +48,7 @@ export default function Projects() {
           minHeight: '300px',
           gap: '1rem'
         }}>
-          <PulseLoader color="#36d7b7" size={15} />
+          <Pulse size="lg" color="blue" />
           <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>Loading projects...</p>
           <p style={{ fontSize: '0.9rem', opacity: '0.7' }}>
             Server might be waking up (first load ~30s)
