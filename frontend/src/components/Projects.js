@@ -1,18 +1,17 @@
-// Projects.js - Updated with loading state
+// Projects.js - Updated with CSS spinner (no external dependencies)
 import React, { useEffect, useState } from "react";
-import { Pulse } from 'react-bits'; // Add this import
 import API, { BACKEND_URL } from "../api";
 import "./Projects.css";
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true); // Add loading state
-  const [error, setError] = useState(null); // Add error state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        setLoading(true); // Start loading
+        setLoading(true);
         const data = await API.getProjects();
         setProjects(data);
         setError(null);
@@ -20,13 +19,12 @@ export default function Projects() {
         console.error("Projects fetch error:", err);
         setError("Failed to load projects. Server might be starting up...");
       } finally {
-        setLoading(false); // End loading regardless of success/error
+        setLoading(false);
       }
     };
     fetchProjects();
   }, []);
 
-  // Helper function to handle image URLs
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '';
     if (imagePath.startsWith('https://') || imagePath.startsWith('http://')) {
@@ -35,12 +33,36 @@ export default function Projects() {
     return `${BACKEND_URL}${imagePath}`;
   };
 
-  // Loading state JSX
+  // CSS Spinner Component
+  const Spinner = () => (
+    <div style={{
+      width: '50px',
+      height: '50px',
+      border: '4px solid #f3f3f3',
+      borderTop: '4px solid #3498db',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite'
+    }}></div>
+  );
+
+  // Add keyframe animation to your CSS or inline
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
   if (loading) {
     return (
       <section className="projects-section">
         <h2 className="section-title" id="projects">Projects</h2>
-        <div className="loading-container" style={{ 
+        <div style={{ 
           display: 'flex', 
           flexDirection: 'column', 
           alignItems: 'center', 
@@ -48,7 +70,7 @@ export default function Projects() {
           minHeight: '300px',
           gap: '1rem'
         }}>
-          <Pulse size="lg" color="blue" />
+          <Spinner />
           <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>Loading projects...</p>
           <p style={{ fontSize: '0.9rem', opacity: '0.7' }}>
             Server might be waking up (first load ~30s)
@@ -58,12 +80,11 @@ export default function Projects() {
     );
   }
 
-  // Error state JSX
   if (error) {
     return (
       <section className="projects-section">
         <h2 className="section-title" id="projects">Projects</h2>
-        <div className="error-container" style={{ 
+        <div style={{ 
           textAlign: 'center', 
           padding: '2rem',
           minHeight: '300px',
@@ -91,7 +112,6 @@ export default function Projects() {
     );
   }
 
-  // Normal render when data is loaded
   return (
     <section className="projects-section">
       <h2 className="section-title" id="projects">Projects</h2>

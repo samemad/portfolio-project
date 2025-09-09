@@ -1,18 +1,18 @@
-// Certifications.js - Updated with loading state
+
+// Certifications.js - Updated with CSS spinner
 import React, { useEffect, useState } from "react";
-import { Pulse } from 'react-bits'; // Add this import
 import API, { BACKEND_URL } from "../api";
 import "./Certifications.css";
 
 export default function Certifications() {
   const [certs, setCerts] = useState([]);
-  const [loading, setLoading] = useState(true); // Add loading state
-  const [error, setError] = useState(null); // Add error state
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchCerts = async () => {
       try {
-        setLoading(true); // Start loading
+        setLoading(true);
         const data = await API.getCertifications();
         setCerts(data);
         setError(null);
@@ -20,13 +20,12 @@ export default function Certifications() {
         console.error("Certifications fetch error:", err);
         setError("Failed to load certifications. Server might be starting up...");
       } finally {
-        setLoading(false); // End loading regardless of success/error
+        setLoading(false);
       }
     };
     fetchCerts();
   }, []);
 
-  // Helper function to handle image URLs
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '';
     if (imagePath.startsWith('https://') || imagePath.startsWith('http://')) {
@@ -35,12 +34,36 @@ export default function Certifications() {
     return `${BACKEND_URL}${imagePath}`;
   };
 
-  // Loading state JSX
+  // CSS Spinner Component (green version)
+  const Spinner = () => (
+    <div style={{
+      width: '50px',
+      height: '50px',
+      border: '4px solid #f3f3f3',
+      borderTop: '4px solid #27ae60',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite'
+    }}></div>
+  );
+
+  // Add keyframe animation
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
   if (loading) {
     return (
       <section className="certs-section">
         <h2 className="section-title">Certifications</h2>
-        <div className="loading-container" style={{ 
+        <div style={{ 
           display: 'flex', 
           flexDirection: 'column', 
           alignItems: 'center', 
@@ -48,7 +71,7 @@ export default function Certifications() {
           minHeight: '300px',
           gap: '1rem'
         }}>
-          <Pulse size="lg" color="green" />
+          <Spinner />
           <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>Loading certifications...</p>
           <p style={{ fontSize: '0.9rem', opacity: '0.7' }}>
             Server might be waking up (first load ~30s)
@@ -58,12 +81,11 @@ export default function Certifications() {
     );
   }
 
-  // Error state JSX
   if (error) {
     return (
       <section className="certs-section">
         <h2 className="section-title">Certifications</h2>
-        <div className="error-container" style={{ 
+        <div style={{ 
           textAlign: 'center', 
           padding: '2rem',
           minHeight: '300px',
@@ -91,7 +113,6 @@ export default function Certifications() {
     );
   }
 
-  // Normal render when data is loaded
   return (
     <section className="certs-section">
       <h2 className="section-title">Certifications</h2>
