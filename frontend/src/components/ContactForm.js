@@ -40,7 +40,7 @@ function ContactForm() {
   const cardClass = `rounded-xl shadow-xl max-w-2xl w-full p-10 flex flex-col items-center space-y-8
     ${isDark ? "bg-black text-white" : "bg-white text-gray-900"}`;
 
- //const titleClass = `${isDark ? "text-orange-500" : "text-orange-600"} text-3xl font-bold`;
+  const titleClass = `${isDark ? "text-orange-500" : "text-orange-600"} text-3xl font-bold`;
   const descClass = `${isDark ? "text-gray-300" : "text-gray-600"} text-center`;
 
   const inputBase = "w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2";
@@ -58,9 +58,7 @@ function ContactForm() {
   return (
     <section id="contact" className={`px-6 py-20 flex justify-center`}>
       <div className={cardClass}>
-        <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
-        Contact Me
-      </ThemedGradientText>
+        <h2 className={titleClass}>Contact Me</h2>
         <p className={descClass}>Feel free to reach out to me via email or social media!</p>
 
         {/* Form */}
