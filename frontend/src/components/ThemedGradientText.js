@@ -13,7 +13,7 @@ export default function ThemedGradientText({
   
   // Theme-based gradient colors matching your CSS
   const themeColors = {
-    dark: ["#2b2b36, #1f1f2a"], // Purple gradients
+    dark: ["90deg,#2b2b36, #1f1f2a"], // Purple gradients
     light: ["#ff6a00", "#ff8a1c", "#ff9e33", "#ffb84d", "#ff6a00"] // Orange gradients
   };
   
