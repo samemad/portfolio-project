@@ -1,5 +1,4 @@
-# Simple workflow for deploying React app to GitHub Pages
-name: Deploy React App to Pages
+﻿name: Deploy React App to Pages
 
 on:
   push:
@@ -24,32 +23,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
-      - name: Setup Node.js
+
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: '22'  # Make sure this is set to 22
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: './frontend/package-lock.json'
-          
+
       - name: Install dependencies
         working-directory: ./frontend
-        run: npm install --ignore-engines  # TEMPORARY FIX
+        run: npm install --ignore-engines
         
       - name: Build React app
         working-directory: ./frontend
         env:
           REACT_APP_API_URL: https://portfolio-project-p04q.onrender.com/api
         run: npm run build
-        
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: './frontend/build'
-          
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
