@@ -1,7 +1,6 @@
-
-// Certifications.js - Updated with loading state
+// Certifications.js - Updated with react-spinners
 import React, { useEffect, useState } from "react";
-import { Pulse } from 'react-bits'; // Add this import
+import { PulseLoader } from 'react-spinners'; // Changed from react-bits
 import API, { BACKEND_URL } from "../api";
 import "./Certifications.css";
 
@@ -49,7 +48,7 @@ export default function Certifications() {
           minHeight: '300px',
           gap: '1rem'
         }}>
-          <Pulse size="lg" color="green" />
+          <PulseLoader color="#36d7b7" size={15} />
           <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>Loading certifications...</p>
           <p style={{ fontSize: '0.9rem', opacity: '0.7' }}>
             Server might be waking up (first load ~30s)
