@@ -34,7 +34,7 @@ function Hero() {
               "Building modern web solutions", 
               "Creating scalable full-stack apps"
             ]}
-            typingSpeed={75}
+            typingSpeed={90}
             pauseDuration={1500}
             deletingSpeed={50}
             showCursor={true}
