@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import API, { BACKEND_URL } from "../api";
 import "./Certifications.css";
+import ThemedGradientText from './ThemedGradientText';
 
 export default function Certifications() {
   const [certs, setCerts] = useState([]);
@@ -62,7 +63,9 @@ export default function Certifications() {
   if (loading) {
     return (
       <section className="certs-section">
-        <h2 className="section-title">Certifications</h2>
+       <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+        Certifications  
+      </ThemedGradientText>
         <div style={{ 
           display: 'flex', 
           flexDirection: 'column', 

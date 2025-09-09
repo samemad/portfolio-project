@@ -2,6 +2,9 @@
 import React, { useEffect, useState } from "react";
 import API, { BACKEND_URL } from "../api";
 import "./Projects.css";
+import ThemedGradientText from './ThemedGradientText';
+
+
 
 export default function Projects() {
   const [projects, setProjects] = useState([]);
@@ -61,7 +64,9 @@ export default function Projects() {
   if (loading) {
     return (
       <section className="projects-section">
-        <h2 className="section-title" id="projects">Projects</h2>
+        <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+          Projects
+        </ThemedGradientText>
         <div style={{ 
           display: 'flex', 
           flexDirection: 'column', 

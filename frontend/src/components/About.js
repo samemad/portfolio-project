@@ -1,13 +1,13 @@
 import React from 'react';
 import profileImg from '../assets/Sam.png'; // <-- put your image in src/assets
+import ThemedGradientText from './ThemedGradientText';
 
 function About() {
   return (
     <section id="about" className="px-6 py-20 max-w-6xl mx-auto">
-      <h2 className="section-title text-4xl font-bold text-center mb-12">
+      <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
         About Me
-      </h2>
-
+      </ThemedGradientText>
       <div className="flex flex-col md:flex-row items-center gap-10">
         {/* Image */}
         <div className="w-full md:w-1/3 lg:w-1/4 flex-shrink-0"> {/* Adjusted width classes */}
