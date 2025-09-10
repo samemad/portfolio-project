@@ -36,38 +36,23 @@ function ContactForm() {
     );
   };
 
-  // Hero gradient colors
-  const heroColors = {
-    dark: {
-      primary: '#71718d',
-      secondary: '#1f1f2a',
-      hover: '#3a3a4a'
-    },
-    light: {
-      primary: '#ff6a00',
-      secondary: '#ff8a1c', 
-      hover: '#e55a00'
-    }
-  };
-
-  const colors = heroColors[theme];
-
   // classes (Tailwind + dynamic)
   const cardClass = `rounded-xl shadow-xl max-w-2xl w-full p-10 flex flex-col items-center space-y-8
     ${isDark ? "bg-black text-white" : "bg-white text-gray-900"}`;
 
   const descClass = `${isDark ? "text-gray-300" : "text-gray-600"} text-center`;
 
-  const inputBase = "w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2 transition-all duration-300";
+  const inputBase = "w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2";
   const inputClass = isDark
-    ? `${inputBase} bg-black text-white placeholder-gray-400`
-    : `${inputBase} bg-white text-gray-900 placeholder-gray-500`;
+    ? `${inputBase} border border-orange-500 bg-black text-white placeholder-gray-400 focus:ring-orange-500`
+    : `${inputBase} border border-orange-500 bg-white text-gray-900 placeholder-gray-500 focus:ring-orange-500`;
 
   const btnClass = isDark
-    ? "text-white font-semibold py-3 rounded-lg transition-all duration-300 w-full"
-    : "text-white font-semibold py-3 rounded-lg transition-all duration-300 w-full";
+    ? "bg-orange-500 text-black font-semibold py-3 rounded-lg hover:bg-orange-600 transition w-full"
+    : "bg-orange-500 text-white font-semibold py-3 rounded-lg hover:bg-orange-600 transition w-full";
 
-  const iconBase = "text-3xl transition-all duration-300";
+  const iconBase = "text-3xl transition";
+  const iconClass = isDark ? `${iconBase} text-orange-500 hover:text-orange-600` : `${iconBase} text-orange-600 hover:text-orange-700`;
 
   return (
     <section id="contact" className={`px-6 py-20 flex justify-center`}>
@@ -86,12 +71,6 @@ function ContactForm() {
             onChange={e => setName(e.target.value)}
             required
             className={inputClass}
-            style={{
-              border: `2px solid ${colors.primary}`,
-              focusRing: colors.primary
-            }}
-            onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${colors.primary}40`}
-            onBlur={(e) => e.target.style.boxShadow = 'none'}
           />
           <input
             type="email"
@@ -100,11 +79,6 @@ function ContactForm() {
             onChange={e => setEmail(e.target.value)}
             required
             className={inputClass}
-            style={{
-              border: `2px solid ${colors.primary}`,
-            }}
-            onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${colors.primary}40`}
-            onBlur={(e) => e.target.style.boxShadow = 'none'}
           />
           <textarea
             placeholder="Your Message"
@@ -112,75 +86,24 @@ function ContactForm() {
             onChange={e => setMessage(e.target.value)}
             rows="4"
             className={inputClass}
-            style={{
-              border: `2px solid ${colors.primary}`,
-            }}
-            onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${colors.primary}40`}
-            onBlur={(e) => e.target.style.boxShadow = 'none'}
           />
-          <button 
-            type="submit" 
-            className={btnClass}
-            style={{
-              background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-            }}
-            onMouseEnter={(e) => e.target.style.background = `linear-gradient(135deg, ${colors.hover}, ${colors.primary})`}
-            onMouseLeave={(e) => e.target.style.background = `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`}
-          >
-            Send Message
-          </button>
+          <button type="submit" className={btnClass}>Send Message</button>
         </form>
 
         {success && <p className="text-green-500">{success}</p>}
 
         {/* Social Icons */}
         <div className="flex space-x-6 mt-4">
-          <a 
-            href="https://www.linkedin.com/in/samal-athwary" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className={iconBase} 
-            aria-label="LinkedIn"
-            style={{ color: colors.primary }}
-            onMouseEnter={(e) => e.target.style.color = colors.hover}
-            onMouseLeave={(e) => e.target.style.color = colors.primary}
-          >
+          <a href="https://www.linkedin.com/in/samal-athwary" target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="LinkedIn">
             <FaLinkedin />
           </a>
-          <a 
-            href="https://www.facebook.com/Al-athwarySam" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className={iconBase} 
-            aria-label="Facebook"
-            style={{ color: colors.primary }}
-            onMouseEnter={(e) => e.target.style.color = colors.hover}
-            onMouseLeave={(e) => e.target.style.color = colors.primary}
-          >
+          <a href="https://www.facebook.com/Al-athwarySam" target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="Facebook">
             <FaFacebookF />
           </a>
-          <a 
-            href="https://wa.me/967779809248" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className={iconBase} 
-            aria-label="WhatsApp"
-            style={{ color: colors.primary }}
-            onMouseEnter={(e) => e.target.style.color = colors.hover}
-            onMouseLeave={(e) => e.target.style.color = colors.primary}
-          >
+          <a href="https://wa.me/967779809248" target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="WhatsApp">
             <FaWhatsapp />
           </a>
-          <a 
-            href="https://www.github.com/samemad" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className={iconBase} 
-            aria-label="Github"
-            style={{ color: colors.primary }}
-            onMouseEnter={(e) => e.target.style.color = colors.hover}
-            onMouseLeave={(e) => e.target.style.color = colors.primary}
-          >
+          <a href="https://www.github.com/samemad" target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="Github">
             <FaGithub />
           </a>
         </div>
