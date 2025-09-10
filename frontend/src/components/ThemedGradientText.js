@@ -13,7 +13,7 @@ export default function ThemedGradientText({
   
   // Theme-based gradient colors matching your hero CSS exactly
   const themeColors = {
-    dark: ["#7c3aed", "#6366f1", "#7c3aed", "#6366f1"], // Matches hero gradient exactly
+    dark: ["#ff6a00", "#ff8a1c", "#ff9e33", "#ffb84d", "#ff6a00"], // Orange gradients/ Matches hero gradient exactly
     light: ["#ff6a00", "#ff8a1c", "#ff9e33", "#ffb84d", "#ff6a00"] // Orange gradients
   };
   
