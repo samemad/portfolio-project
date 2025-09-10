@@ -36,13 +36,8 @@ function ContactForm() {
     );
   };
 
-  // Hero gradient colors
+  // Hero gradient colors (orange only)
   const heroColors = {
-    dark: {
-      primary: '#ff6a00',
-      secondary: '#ff8a1c',
-      hover: '#e55a00'
-    },
     light: {
       primary: '#ff6a00',
       secondary: '#ff8a1c', 
@@ -50,7 +45,8 @@ function ContactForm() {
     }
   };
 
-  const colors = heroColors[theme];
+  // Force orange palette always
+  const colors = heroColors.light;
 
   // classes (Tailwind + dynamic)
   const cardClass = `rounded-xl shadow-xl max-w-2xl w-full p-10 flex flex-col items-center space-y-8
@@ -59,13 +55,11 @@ function ContactForm() {
   const descClass = `${isDark ? "text-gray-300" : "text-gray-600"} text-center`;
 
   const inputBase = "w-full rounded-lg px-4 py-2 focus:outline-none focus:ring-2 transition-all duration-300";
-  const inputClass = isDark
-    ? `${inputBase} bg-black text-white placeholder-gray-400`
-    : `${inputBase} bg-white text-gray-900 placeholder-gray-500`;
 
-  const btnClass = isDark
-    ? "text-white font-semibold py-3 rounded-lg transition-all duration-300 w-full"
-    : "text-white font-semibold py-3 rounded-lg transition-all duration-300 w-full";
+  // Inputs are always white with dark text
+  const inputClass = `${inputBase} bg-white text-gray-900 placeholder-gray-500`;
+
+  const btnClass = "text-white font-semibold py-3 rounded-lg transition-all duration-300 w-full";
 
   const iconBase = "text-3xl transition-all duration-300";
 
@@ -87,8 +81,7 @@ function ContactForm() {
             required
             className={inputClass}
             style={{
-              border: `2px solid ${colors.primary}`,
-              focusRing: colors.primary
+              border: `2px solid ${colors.primary}`
             }}
             onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${colors.primary}40`}
             onBlur={(e) => e.target.style.boxShadow = 'none'}
@@ -101,7 +94,7 @@ function ContactForm() {
             required
             className={inputClass}
             style={{
-              border: `2px solid ${colors.primary}`,
+              border: `2px solid ${colors.primary}`
             }}
             onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${colors.primary}40`}
             onBlur={(e) => e.target.style.boxShadow = 'none'}
@@ -113,7 +106,7 @@ function ContactForm() {
             rows="4"
             className={inputClass}
             style={{
-              border: `2px solid ${colors.primary}`,
+              border: `2px solid ${colors.primary}`
             }}
             onFocus={(e) => e.target.style.boxShadow = `0 0 0 3px ${colors.primary}40`}
             onBlur={(e) => e.target.style.boxShadow = 'none'}
@@ -122,7 +115,7 @@ function ContactForm() {
             type="submit" 
             className={btnClass}
             style={{
-              background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+              background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`
             }}
             onMouseEnter={(e) => e.target.style.background = `linear-gradient(135deg, ${colors.hover}, ${colors.primary})`}
             onMouseLeave={(e) => e.target.style.background = `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`}
