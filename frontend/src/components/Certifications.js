@@ -63,7 +63,7 @@ export default function Certifications() {
   if (loading) {
     return (
       <section className="certs-section">
-       <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+       <ThemedGradientText className="text-5xl font-bold mb-8 text-center">
         Certifications  
       </ThemedGradientText>
         <div style={{ 
@@ -87,7 +87,7 @@ export default function Certifications() {
   if (error) {
     return (
       <section className="certs-section">
-       <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+       <ThemedGradientText className="text-5xl font-bold mb-8 text-center">
         Certifications  
       </ThemedGradientText>
         <div style={{ 
@@ -120,7 +120,7 @@ export default function Certifications() {
 
   return (
     <section className="certs-section">
-     <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+     <ThemedGradientText className="text-5xl font-bold mb-8 text-center">
         Certifications  
       </ThemedGradientText>
       <div className="certs-scroll-container">

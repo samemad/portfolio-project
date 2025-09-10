@@ -5,7 +5,7 @@ import ThemedGradientText from './ThemedGradientText';
 function About() {
   return (
     <section id="about" className="px-6 py-20 max-w-6xl mx-auto">
-      <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+      <ThemedGradientText className="text-5xl font-bold mb-8 text-center">
         About Me
       </ThemedGradientText>
       <div className="flex flex-col md:flex-row items-center gap-10">

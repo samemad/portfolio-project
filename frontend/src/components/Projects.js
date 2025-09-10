@@ -64,7 +64,7 @@ export default function Projects() {
   if (loading) {
     return (
       <section className="projects-section">
-        <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+        <ThemedGradientText className="text-5xl font-bold mb-8 text-center">
           Projects
         </ThemedGradientText>
         <div style={{ 
@@ -88,7 +88,7 @@ export default function Projects() {
   if (error) {
     return (
       <section className="projects-section">
-        <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+        <ThemedGradientText className="text-5xl font-bold mb-8 text-center">
           Projects
         </ThemedGradientText>
         <div style={{ 
@@ -121,7 +121,7 @@ export default function Projects() {
 
   return (
     <section className="projects-section">
-      <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+      <ThemedGradientText className="text-5xl font-bold mb-8 text-center">
           Projects
         </ThemedGradientText>
       <div className="projects-scroll-container">

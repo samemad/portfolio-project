@@ -57,7 +57,7 @@ function ContactForm() {
   return (
     <section id="contact" className={`px-6 py-20 flex justify-center`}>
       <div className={cardClass}>
-        <ThemedGradientText className="text-4xl font-bold mb-8 text-center">
+        <ThemedGradientText className="text-5xl font-bold mb-8 text-center">
           Contact Me
         </ThemedGradientText>
         <p className={descClass}>Feel free to reach out to me via email or social media!</p>
