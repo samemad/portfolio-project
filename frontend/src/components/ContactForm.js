@@ -45,7 +45,7 @@ function ContactForm() {
     },
     light: {
       primary: '#ff6a00',
-      secondary: '#ff8a1c', 
+      secondary: '#ff5500 ', 
       hover: '#e55a00'
     }
   };
