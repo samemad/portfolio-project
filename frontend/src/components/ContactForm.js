@@ -39,7 +39,7 @@ function ContactForm() {
   // Hero gradient colors
   const heroColors = {
     dark: {
-      primary: '#2b2b36',
+      primary: '#71718d',
       secondary: '#1f1f2a',
       hover: '#3a3a4a'
     },
