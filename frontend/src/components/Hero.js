@@ -2,7 +2,7 @@
 import React from 'react';
 import { HashLink } from 'react-router-hash-link';
 import TextType from './TextType'; // Import your TextType component
-import heroImage from '../assets/images/hero.jpg';
+import heroImage from '../assets/images/hero.JPG';
 import SplitText from './SplitText';
 
 function Hero() {
