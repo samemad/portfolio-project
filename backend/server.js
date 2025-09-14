@@ -8,74 +8,11 @@ const path = require('path');
 const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 const redis = require('redis');
-
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 
-// ---------------- CLOUDINARY CONFIG -----------------
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
-
-app.use(cors({
-  origin: ["https://devsam.icu", "https://portfolio-project-p04q.onrender.com"],
-  credentials: true
-}));
-
-app.use(express.json());
-
-// ---------------- REQUEST LOGGING MIDDLEWARE -----------------
-app.use((req, res, next) => {
-  const start = Date.now();
-  res.on('finish', () => {
-    const duration = Date.now() - start;
-    console.log(`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
-  });
-  next();
-});
-
-console.log('🚀 Server starting...');
-console.log('Environment variables loaded:');
-console.log('DATABASE_URL:', process.env.DATABASE_URL);
-console.log('PORT:', process.env.PORT);
-console.log('JWT_SECRET:', process.env.JWT_SECRET);
-console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME);
-
-// ---------------- MULTER (Updated for memory storage) -----------------
-const storage = multer.memoryStorage();
-const upload = multer({ 
-  storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'), false);
-    }
-  }
-});
-
-// ---------------- POSTGRESQL -----------------
-console.log('🔌 Connecting to PostgreSQL...');
-const db = new Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
-
-db.connect()
-  .then(() => console.log('✅ PostgreSQL Connected successfully'))
-  .catch(err => {
-    console.error('❌ PostgreSQL connection error:', err);
-    console.error('Make sure PostgreSQL is running and database exists!');
-    process.exit(1);
-  });
-
-  // Add this after your PostgreSQL setup
+// ---------------- REDIS SETUP -----------------
 console.log('🔌 Connecting to Redis...');
 const redisClient = redis.createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379'
@@ -88,7 +25,9 @@ redisClient.connect()
     console.log('⚠️ Running without Redis cache');
   });
 
-  // Cache helper functions
+redisClient.on('error', (err) => console.log('Redis Client Error', err));
+
+// Cache helper functions
 const getCache = async (key) => {
   try {
     const data = await redisClient.get(key);
@@ -121,7 +60,69 @@ const deleteCache = async (key) => {
   }
 };
 
-redisClient.on('error', (err) => console.log('Redis Client Error', err));
+// ---------------- CLOUDINARY CONFIG -----------------
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+app.use(cors({
+  origin: ["https://devsam.icu", "https://portfolio-project-p04q.onrender.com"],
+  credentials: true
+}));
+
+app.use(express.json());
+
+// ---------------- REQUEST LOGGING MIDDLEWARE -----------------
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
+  });
+  next();
+});
+
+console.log('🚀 Server starting...');
+console.log('Environment variables loaded:');
+console.log('DATABASE_URL:', process.env.DATABASE_URL);
+console.log('PORT:', process.env.PORT);
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
+console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME);
+console.log('REDIS_URL:', process.env.REDIS_URL);
+
+// ---------------- MULTER (Updated for memory storage) -----------------
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
+
+// ---------------- POSTGRESQL -----------------
+console.log('🔌 Connecting to PostgreSQL...');
+const db = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
+
+db.connect()
+  .then(() => console.log('✅ PostgreSQL Connected successfully'))
+  .catch(err => {
+    console.error('❌ PostgreSQL connection error:', err);
+    console.error('Make sure PostgreSQL is running and database exists!');
+    process.exit(1);
+  });
+
 // ---------------- OPTIMIZED CLOUDINARY UPLOAD -----------------
 const uploadToCloudinary = (buffer, folder = 'portfolio') => {
   return new Promise((resolve, reject) => {
@@ -205,8 +206,7 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-// ---------------- PROJECTS -----------------
-// PROJECTS - Add caching to this slow endpoint!
+// ---------------- PROJECTS WITH REDIS CACHING -----------------
 app.get('/api/projects', async (req, res) => {
   console.log('📊 Projects request received');
   
@@ -232,15 +232,44 @@ app.get('/api/projects', async (req, res) => {
   }
 });
 
-// Update your POST project endpoint
 app.post('/api/projects', verifyToken, upload.single('image'), async (req, res) => {
-  // ... your existing code ...
+  console.log('Adding project, body:', req.body);
+  const { title, description, link } = req.body;
+  
+  let image = '';
+  
+  // Check if image exists and validate
+  if (req.file) {
+    console.log('File received:', {
+      originalName: req.file.originalname,
+      size: req.file.size,
+      mimetype: req.file.mimetype
+    });
+    
+    try {
+      console.log('Starting Cloudinary upload...');
+      const startTime = Date.now();
+      image = await uploadToCloudinary(req.file.buffer, 'projects');
+      const uploadTime = Date.now() - startTime;
+      console.log(`Cloudinary upload completed in ${uploadTime}ms`);
+    } catch (error) {
+      console.error('Cloudinary upload error:', error);
+      return res.status(500).json({ 
+        message: 'Image upload failed', 
+        error: error.message || 'Unknown upload error' 
+      });
+    }
+  }
   
   try {
+    console.log('Saving to database...');
+    const dbStart = Date.now();
     const result = await db.query(
       'INSERT INTO projects (title, description, image, link) VALUES ($1, $2, $3, $4) RETURNING *',
       [title, description, image, link]
     );
+    const dbTime = Date.now() - dbStart;
+    console.log(`Database save completed in ${dbTime}ms`);
     
     // 🔥 CLEAR CACHE after adding new project
     await deleteCache('projects');
@@ -251,18 +280,62 @@ app.post('/api/projects', verifyToken, upload.single('image'), async (req, res) 
       project: result.rows[0] 
     });
   } catch (err) {
-    // ... error handling
+    console.error('Database error:', err);
+    return res.status(500).json({ 
+      message: 'Database error', 
+      error: err.message 
+    });
   }
 });
 
-// Update your PUT project endpoint
 app.put('/api/projects/:id', verifyToken, upload.single('image'), async (req, res) => {
-  // ... your existing code ...
+  console.log('Updating project with ID:', req.params.id);
+  const { title, description, link } = req.body;
   
   try {
-    const updatedProject = await db.query(/* your update query */);
+    // Get current project
+    const currentProject = await db.query('SELECT * FROM projects WHERE id = $1', [req.params.id]);
+    if (!currentProject.rows.length) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
     
-    // 🔥 CLEAR CACHE after updating
+    let newImage = currentProject.rows[0].image; // Keep existing image by default
+    
+    if (req.file) {
+      console.log('New file received for update:', {
+        originalName: req.file.originalname,
+        size: req.file.size,
+        mimetype: req.file.mimetype
+      });
+      
+      try {
+        console.log('Uploading new image...');
+        const startTime = Date.now();
+        newImage = await uploadToCloudinary(req.file.buffer, 'projects');
+        const uploadTime = Date.now() - startTime;
+        console.log(`New image uploaded in ${uploadTime}ms`);
+      } catch (error) {
+        console.error('Cloudinary upload error:', error);
+        return res.status(500).json({ 
+          message: 'Image upload failed', 
+          error: error.message 
+        });
+      }
+    }
+    
+    // Update with new values or keep existing ones
+    const updatedProject = await db.query(
+      `UPDATE projects 
+       SET title = COALESCE($1, title), 
+           description = COALESCE($2, description), 
+           image = $3, 
+           link = COALESCE($4, link)
+       WHERE id = $5 
+       RETURNING *`,
+      [title || null, description || null, newImage, link || null, req.params.id]
+    );
+    
+    // 🔥 CLEAR CACHE after updating project
     await deleteCache('projects');
     console.log('🔄 Projects cache cleared after update');
     
@@ -271,30 +344,35 @@ app.put('/api/projects/:id', verifyToken, upload.single('image'), async (req, re
       project: updatedProject.rows[0] 
     });
   } catch (err) {
-    // ... error handling
+    console.error('Update error:', err);
+    return res.status(500).json({ 
+      message: 'Database error', 
+      error: err.message 
+    });
   }
 });
 
-// Update your DELETE project endpoint
 app.delete('/api/projects/:id', verifyToken, async (req, res) => {
+  console.log('Deleting project with ID:', req.params.id);
   try {
     const result = await db.query('DELETE FROM projects WHERE id = $1 RETURNING *', [req.params.id]);
-    
-    // 🔥 CLEAR CACHE after deleting
-    await deleteCache('projects');
-    console.log('🔄 Projects cache cleared after deletion');
     
     if (!result.rows.length) {
       return res.status(404).json({ message: 'Project not found' });
     }
+    
+    // 🔥 CLEAR CACHE after deleting project
+    await deleteCache('projects');
+    console.log('🔄 Projects cache cleared after deletion');
+    
     res.json({ message: 'Project deleted successfully' });
   } catch (err) {
+    console.error('Delete error:', err);
     return res.status(500).json({ message: 'Database error', error: err.message });
   }
 });
 
-// ---------------- CERTIFICATIONS -----------------
-// CERTIFICATIONS - Add caching here too!
+// ---------------- CERTIFICATIONS WITH REDIS CACHING -----------------
 app.get('/api/certifications', async (req, res) => {
   console.log('📊 Certifications request received');
   
@@ -319,9 +397,7 @@ app.get('/api/certifications', async (req, res) => {
     return res.status(500).json({ message: 'Database error', error: err.message });
   }
 });
-// ---------------- CERTIFICATIONS WITH REDIS CACHING -----------------
 
-// POST - Add new certification
 app.post('/api/certifications', verifyToken, upload.single('image'), async (req, res) => {
   console.log('Adding certification, body:', req.body);
   const { name, provider, year } = req.body;
@@ -373,7 +449,6 @@ app.post('/api/certifications', verifyToken, upload.single('image'), async (req,
   }
 });
 
-// PUT - Update existing certification
 app.put('/api/certifications/:id', verifyToken, upload.single('image'), async (req, res) => {
   console.log('Updating certification with ID:', req.params.id);
   const { name, provider, year } = req.body;
@@ -438,7 +513,6 @@ app.put('/api/certifications/:id', verifyToken, upload.single('image'), async (r
   }
 });
 
-// DELETE - Remove certification
 app.delete('/api/certifications/:id', verifyToken, async (req, res) => {
   console.log('Deleting certification with ID:', req.params.id);
   try {
@@ -506,4 +580,5 @@ app.listen(PORT, () => {
   console.log(`🌍 Frontend: http://localhost:${PORT}/`);
   console.log(`⚡ Admin: http://localhost:${PORT}/admin/`);
   console.log(`🏥 Health Check: http://localhost:${PORT}/api/health`);
+  console.log(`🔥 Redis caching enabled for lightning-fast performance!`);
 });
