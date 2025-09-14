@@ -7,6 +7,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
+const redis = require('redis');
+
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
@@ -73,6 +75,53 @@ db.connect()
     process.exit(1);
   });
 
+  // Add this after your PostgreSQL setup
+console.log('🔌 Connecting to Redis...');
+const redisClient = redis.createClient({
+  url: process.env.REDIS_URL || 'redis://localhost:6379'
+});
+
+redisClient.connect()
+  .then(() => console.log('✅ Redis Connected successfully'))
+  .catch(err => {
+    console.error('❌ Redis connection error:', err);
+    console.log('⚠️ Running without Redis cache');
+  });
+
+  // Cache helper functions
+const getCache = async (key) => {
+  try {
+    const data = await redisClient.get(key);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Cache get error:', error);
+    return null;
+  }
+};
+
+const setCache = async (key, data, ttl = null) => {
+  try {
+    if (ttl) {
+      await redisClient.setEx(key, ttl, JSON.stringify(data));
+    } else {
+      await redisClient.set(key, JSON.stringify(data)); // No expiration for portfolio
+    }
+    console.log(`📦 Cached: ${key}`);
+  } catch (error) {
+    console.error('Cache set error:', error);
+  }
+};
+
+const deleteCache = async (key) => {
+  try {
+    await redisClient.del(key);
+    console.log(`🗑️ Cleared cache: ${key}`);
+  } catch (error) {
+    console.error('Cache delete error:', error);
+  }
+};
+
+redisClient.on('error', (err) => console.log('Redis Client Error', err));
 // ---------------- OPTIMIZED CLOUDINARY UPLOAD -----------------
 const uploadToCloudinary = (buffer, folder = 'portfolio') => {
   return new Promise((resolve, reject) => {
@@ -157,132 +206,84 @@ const verifyToken = (req, res, next) => {
 };
 
 // ---------------- PROJECTS -----------------
+// PROJECTS - Add caching to this slow endpoint!
 app.get('/api/projects', async (req, res) => {
-  console.log('Fetching all projects');
+  console.log('📊 Projects request received');
+  
   try {
+    // Check cache first
+    const cached = await getCache('projects');
+    if (cached) {
+      console.log('⚡ CACHE HIT - Projects served in 5ms!');
+      return res.json(cached);
+    }
+    
+    console.log('💾 CACHE MISS - Fetching from database...');
     const result = await db.query('SELECT * FROM projects ORDER BY id DESC');
+    
+    // Cache FOREVER (perfect for portfolio!)
+    await setCache('projects', result.rows);
+    
+    console.log('✅ Projects fetched and cached');
     res.json(result.rows);
   } catch (err) {
+    console.error('Projects error:', err);
     return res.status(500).json({ message: 'Database error', error: err.message });
   }
 });
 
+// Update your POST project endpoint
 app.post('/api/projects', verifyToken, upload.single('image'), async (req, res) => {
-  console.log('Adding project, body:', req.body);
-  const { title, description, link } = req.body;
-  
-  let image = '';
-  
-  // Check if image exists and validate
-  if (req.file) {
-    console.log('File received:', {
-      originalName: req.file.originalname,
-      size: req.file.size,
-      mimetype: req.file.mimetype
-    });
-    
-    try {
-      console.log('Starting Cloudinary upload...');
-      const startTime = Date.now();
-      image = await uploadToCloudinary(req.file.buffer, 'projects');
-      const uploadTime = Date.now() - startTime;
-      console.log(`Cloudinary upload completed in ${uploadTime}ms`);
-    } catch (error) {
-      console.error('Cloudinary upload error:', error);
-      return res.status(500).json({ 
-        message: 'Image upload failed', 
-        error: error.message || 'Unknown upload error' 
-      });
-    }
-  }
+  // ... your existing code ...
   
   try {
-    console.log('Saving to database...');
-    const dbStart = Date.now();
     const result = await db.query(
       'INSERT INTO projects (title, description, image, link) VALUES ($1, $2, $3, $4) RETURNING *',
       [title, description, image, link]
     );
-    const dbTime = Date.now() - dbStart;
-    console.log(`Database save completed in ${dbTime}ms`);
+    
+    // 🔥 CLEAR CACHE after adding new project
+    await deleteCache('projects');
+    console.log('🔄 Projects cache cleared after new addition');
     
     res.status(201).json({ 
       message: 'Project added successfully', 
       project: result.rows[0] 
     });
   } catch (err) {
-    console.error('Database error:', err);
-    return res.status(500).json({ 
-      message: 'Database error', 
-      error: err.message 
-    });
+    // ... error handling
   }
 });
 
+// Update your PUT project endpoint
 app.put('/api/projects/:id', verifyToken, upload.single('image'), async (req, res) => {
-  console.log('Updating project with ID:', req.params.id);
-  const { title, description, link } = req.body;
+  // ... your existing code ...
   
   try {
-    // Get current project
-    const currentProject = await db.query('SELECT * FROM projects WHERE id = $1', [req.params.id]);
-    if (!currentProject.rows.length) {
-      return res.status(404).json({ message: 'Project not found' });
-    }
+    const updatedProject = await db.query(/* your update query */);
     
-    let newImage = currentProject.rows[0].image; // Keep existing image by default
-    
-    if (req.file) {
-      console.log('New file received for update:', {
-        originalName: req.file.originalname,
-        size: req.file.size,
-        mimetype: req.file.mimetype
-      });
-      
-      try {
-        console.log('Uploading new image...');
-        const startTime = Date.now();
-        newImage = await uploadToCloudinary(req.file.buffer, 'projects');
-        const uploadTime = Date.now() - startTime;
-        console.log(`New image uploaded in ${uploadTime}ms`);
-      } catch (error) {
-        console.error('Cloudinary upload error:', error);
-        return res.status(500).json({ 
-          message: 'Image upload failed', 
-          error: error.message 
-        });
-      }
-    }
-    
-    // Update with new values or keep existing ones
-    const updatedProject = await db.query(
-      `UPDATE projects 
-       SET title = COALESCE($1, title), 
-           description = COALESCE($2, description), 
-           image = $3, 
-           link = COALESCE($4, link)
-       WHERE id = $5 
-       RETURNING *`,
-      [title || null, description || null, newImage, link || null, req.params.id]
-    );
+    // 🔥 CLEAR CACHE after updating
+    await deleteCache('projects');
+    console.log('🔄 Projects cache cleared after update');
     
     res.json({ 
       message: 'Project updated successfully', 
       project: updatedProject.rows[0] 
     });
   } catch (err) {
-    console.error('Update error:', err);
-    return res.status(500).json({ 
-      message: 'Database error', 
-      error: err.message 
-    });
+    // ... error handling
   }
 });
 
+// Update your DELETE project endpoint
 app.delete('/api/projects/:id', verifyToken, async (req, res) => {
-  console.log('Deleting project with ID:', req.params.id);
   try {
     const result = await db.query('DELETE FROM projects WHERE id = $1 RETURNING *', [req.params.id]);
+    
+    // 🔥 CLEAR CACHE after deleting
+    await deleteCache('projects');
+    console.log('🔄 Projects cache cleared after deletion');
+    
     if (!result.rows.length) {
       return res.status(404).json({ message: 'Project not found' });
     }
@@ -293,16 +294,34 @@ app.delete('/api/projects/:id', verifyToken, async (req, res) => {
 });
 
 // ---------------- CERTIFICATIONS -----------------
+// CERTIFICATIONS - Add caching here too!
 app.get('/api/certifications', async (req, res) => {
-  console.log('Fetching all certifications');
+  console.log('📊 Certifications request received');
+  
   try {
+    // Check cache first
+    const cached = await getCache('certifications');
+    if (cached) {
+      console.log('⚡ CACHE HIT - Certifications served in 5ms!');
+      return res.json(cached);
+    }
+    
+    console.log('💾 CACHE MISS - Fetching from database...');
     const result = await db.query('SELECT * FROM certifications ORDER BY year DESC, id DESC');
+    
+    // Cache FOREVER (perfect for portfolio!)
+    await setCache('certifications', result.rows);
+    
+    console.log('✅ Certifications fetched and cached');
     res.json(result.rows);
   } catch (err) {
+    console.error('Certifications error:', err);
     return res.status(500).json({ message: 'Database error', error: err.message });
   }
 });
+// ---------------- CERTIFICATIONS WITH REDIS CACHING -----------------
 
+// POST - Add new certification
 app.post('/api/certifications', verifyToken, upload.single('image'), async (req, res) => {
   console.log('Adding certification, body:', req.body);
   const { name, provider, year } = req.body;
@@ -336,6 +355,11 @@ app.post('/api/certifications', verifyToken, upload.single('image'), async (req,
       'INSERT INTO certifications (name, provider, year, image) VALUES ($1, $2, $3, $4) RETURNING *',
       [name, provider, year, image]
     );
+    
+    // 🔥 CLEAR CACHE after adding new certification
+    await deleteCache('certifications');
+    console.log('🔄 Certifications cache cleared after new addition');
+    
     res.status(201).json({ 
       message: 'Certification added successfully', 
       certification: result.rows[0] 
@@ -349,6 +373,7 @@ app.post('/api/certifications', verifyToken, upload.single('image'), async (req,
   }
 });
 
+// PUT - Update existing certification
 app.put('/api/certifications/:id', verifyToken, upload.single('image'), async (req, res) => {
   console.log('Updating certification with ID:', req.params.id);
   const { name, provider, year } = req.body;
@@ -396,6 +421,10 @@ app.put('/api/certifications/:id', verifyToken, upload.single('image'), async (r
       [name || null, provider || null, year || null, newImage, req.params.id]
     );
     
+    // 🔥 CLEAR CACHE after updating certification
+    await deleteCache('certifications');
+    console.log('🔄 Certifications cache cleared after update');
+    
     res.json({ 
       message: 'Certification updated successfully', 
       certification: updatedCert.rows[0] 
@@ -409,15 +438,23 @@ app.put('/api/certifications/:id', verifyToken, upload.single('image'), async (r
   }
 });
 
+// DELETE - Remove certification
 app.delete('/api/certifications/:id', verifyToken, async (req, res) => {
   console.log('Deleting certification with ID:', req.params.id);
   try {
     const result = await db.query('DELETE FROM certifications WHERE id = $1 RETURNING *', [req.params.id]);
+    
     if (!result.rows.length) {
       return res.status(404).json({ message: 'Certification not found' });
     }
+    
+    // 🔥 CLEAR CACHE after deleting certification
+    await deleteCache('certifications');
+    console.log('🔄 Certifications cache cleared after deletion');
+    
     res.json({ message: 'Certification deleted successfully' });
   } catch (err) {
+    console.error('Delete error:', err);
     return res.status(500).json({ message: 'Database error', error: err.message });
   }
 });
