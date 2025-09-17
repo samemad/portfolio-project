@@ -4,12 +4,9 @@ import API, { BACKEND_URL } from "../api";
 import "./Projects.css";
 import ThemedGradientText from './ThemedGradientText';
 
-
-
 export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -17,12 +14,10 @@ export default function Projects() {
         setLoading(true);
         const data = await API.getProjects();
         setProjects(data);
-        setError(null);
+        setLoading(false); // Only set false on success
       } catch (err) {
         console.error("Projects fetch error:", err);
-        setError("Failed to load projects. Server might be starting up...");
-      } finally {
-        setLoading(false);
+        // Keep loading = true, so spinner continues
       }
     };
     fetchProjects();
@@ -78,42 +73,8 @@ export default function Projects() {
           <Spinner />
           <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>Loading projects...</p>
           <p style={{ fontSize: '0.9rem', opacity: '0.7' }}>
-            Server might be waking up (first load ~30s)
+            Server waking up (first lazy load ~30s)
           </p>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="projects-section">
-        <ThemedGradientText className="text-5xl font-bold mb-8 text-center">
-          Projects
-        </ThemedGradientText>
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '2rem',
-          minHeight: '300px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <p style={{ color: '#ff6b6b', marginBottom: '1rem' }}>{error}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            Try Again
-          </button>
         </div>
       </section>
     );
