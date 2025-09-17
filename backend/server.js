@@ -68,16 +68,8 @@ cloudinary.config({
 });
 
 app.use(cors({
-  origin: [
-    "https://devsam.icu", 
-    "https://portfolio-project-p04q.onrender.com",
-    "http://localhost:3000", // For local development
-    "http://127.0.0.1:3000"  // Alternative localhost
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  optionsSuccessStatus: 200 // For legacy browser support
+  origin: ["https://devsam.icu", "https://portfolio-project-p04q.onrender.com"],
+  credentials: true
 }));
 
 app.use(express.json());
