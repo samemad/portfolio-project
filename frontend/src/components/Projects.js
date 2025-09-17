@@ -6,6 +6,7 @@ import ThemedGradientText from './ThemedGradientText';
 
 
 
+
 export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
