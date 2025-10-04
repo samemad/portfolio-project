@@ -1,7 +1,6 @@
 // api.js - Optimized version with timeouts and better error handling
 
-const API_BASE = 'https://portfolio-project-p04q.onrender.com/api';
-
+const API_BASE = 'https://diplomatic-alverta-devsam-43044307.koyeb.app/api';
 // Add timeout wrapper for all requests
 const fetchWithTimeout = async (url, options = {}, timeout = 30000) => {
   const controller = new AbortController();
