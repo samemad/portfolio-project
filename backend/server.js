@@ -68,7 +68,7 @@ cloudinary.config({
 });
 
 app.use(cors({
-  origin: ["https://devsam.icu", "https://portfolio-project-p04q.onrender.com"],
+  origin: ["https://devsam.icu",  "https://*.koyeb.app"],
   credentials: true
 }));
 
