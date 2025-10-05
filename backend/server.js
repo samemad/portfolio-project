@@ -110,8 +110,6 @@ const upload = multer({
 
 // ---------------- POSTGRESQL -----------------
 console.log('🔌 Connecting to PostgreSQL...');
-const { Pool } = require('pg'); // Change from Client to Pool
-
 const db = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
