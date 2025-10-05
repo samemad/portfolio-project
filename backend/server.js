@@ -1,5 +1,5 @@
 ﻿const express = require('express');
-const { Client } = require('pg');
+const { Pool } = require('pg');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -110,18 +110,21 @@ const upload = multer({
 
 // ---------------- POSTGRESQL -----------------
 console.log('🔌 Connecting to PostgreSQL...');
-const db = new Client({
+const { Pool } = require('pg'); // Change from Client to Pool
+
+const db = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
-db.connect()
-  .then(() => console.log('✅ PostgreSQL Connected successfully'))
-  .catch(err => {
-    console.error('❌ PostgreSQL connection error:', err);
-    console.error('Make sure PostgreSQL is running and database exists!');
-    process.exit(1);
-  });
+db.on('error', (err) => {
+  console.error('Unexpected database pool error:', err);
+});
+
+// Remove db.connect() - Pool connects automatically
 
 // ---------------- OPTIMIZED CLOUDINARY UPLOAD -----------------
 const uploadToCloudinary = (buffer, folder = 'portfolio') => {
