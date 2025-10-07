@@ -4,7 +4,7 @@ import API, { BACKEND_URL } from "../api";
 import "./Projects.css";
 import ThemedGradientText from './ThemedGradientText';
 
-
+//this is update
 
 
 export default function Projects() {
