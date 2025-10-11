@@ -68,7 +68,11 @@ cloudinary.config({
 });
 
 app.use(cors({
-  origin: ["https://devsam.icu",  "https://*.koyeb.app"],
+  origin: [
+    "https://devsam.icu",
+    "https://samemad.github.io",
+    "http://localhost:3000"  // for local development
+  ],
   credentials: true
 }));
 
