@@ -1,8 +1,8 @@
 // api.js - Optimized version with timeouts and better error handling
 
 
-const API_BASE = 'https://portfolio-project-production-a32d.up.railway.app/api';
 
+const API_BASE = 'https://portfolio-project-production-a32d.up.railway.app/api';
 
 // Add timeout wrapper for all requests
 const fetchWithTimeout = async (url, options = {}, timeout = 30000) => {
