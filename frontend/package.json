@@ -2,7 +2,7 @@
   "name": "my-portfolio",
   "version": "0.1.0",
   "private": true,
- "homepage": "https://samemad.github.io/portfolio-project",
+  "homepage": "https://devsam.icu",
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=8.0.0"
